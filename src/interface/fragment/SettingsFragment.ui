@@ -632,7 +632,7 @@
               <property name="text">
                <string>Set Windows default playback/output to CABLE Input (VB-Audio Virtual Cable), so apps send audio into the cable.
 
-Here, select “Manually select device” and choose your physical headphones or speakers as the JamesDSP output. Windows playback and JamesDSP output must be different endpoints; do not select CABLE Input here.
+Here, choose your physical headphones or speakers from the Device list as the JamesDSP output. Windows playback and JamesDSP output must be different endpoints; do not select CABLE Input here.
 
 If playback stutters, try matching the cable and headphones sample rates in Windows sound device properties (Advanced / Default format), then relink. Matching rates (for example, 192000 Hz when both devices support it) has helped in testing, but is a workaround, not proof of the root cause.
 

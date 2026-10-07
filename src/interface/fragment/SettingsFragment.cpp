@@ -68,8 +68,6 @@ SettingsFragment::SettingsFragment(TrayIcon *trayIcon,
     deviceLayout->setContentsMargins(0, 0, 0, 0);
     deviceLayout->addWidget(deviceScroll);
     ui->devices_group->setTitle(tr("JamesDSP output device"));
-    ui->dev_mode_auto->setText(tr("Use Windows default output device (not for VB-Cable routing)"));
-    ui->dev_mode_manual->setText(tr("Manually select device (physical headphones or speakers)"));
     connect(ui->windowsSoundSettings, &QPushButton::clicked, this, [this] {
         if (!DesktopServices::openUrl("ms-settings:sound", this))
         {
