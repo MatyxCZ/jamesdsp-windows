@@ -13,11 +13,21 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QStandardPaths>
+#include <QSettings>
 #include <QMainWindow>
+#include <QCoreApplication>
 
 #define DESKTOP_FILE "jdsp-gui.desktop"
+#define AUTOSTART_KEY "JamesDSP"
+#define AUTOSTART_REGISTRY_PATH "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
-AutostartManager::AutostartManager(QMainWindow* parent) : QObject(parent){}
+AutostartManager::AutostartManager(QMainWindow* parent) : QObject(parent)
+{
+#ifdef _WIN32
+    // The Run entry is authoritative, including changes made by the registration script.
+    AppConfig::instance().set(AppConfig::AutoStartEnabled, isEnabled());
+#endif
+}
 
 #ifdef USE_PORTALS
 static void onPortalBackgroundRequest(GObject *source_object, GAsyncResult *res, gpointer data) {
@@ -84,6 +94,25 @@ void AutostartManager::setup()
                 nullptr
                 );
 #else
+#ifdef _WIN32
+    QSettings settings(AUTOSTART_REGISTRY_PATH, QSettings::NativeFormat);
+    if(enabled) {
+        const QString execPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+        settings.setValue(AUTOSTART_KEY, QString("\"%1\" --tray").arg(execPath));
+    }
+    else {
+        settings.remove(AUTOSTART_KEY);
+    }
+    settings.sync();
+    if (settings.status() != QSettings::NoError)
+    {
+        Log::error("Could not update the Windows startup registration");
+        AppConfig::instance().set(AppConfig::AutoStartEnabled, isEnabled());
+        QMessageBox::critical(qobject_cast<QMainWindow*>(parent()),
+                              tr("Windows startup"),
+                              tr("Could not update startup registration for the current Windows user."));
+    }
+#else
     if(!enabled && QFile::exists(getAutostartPath())) {
         QFile::remove(getAutostartPath());
     }
@@ -104,6 +133,7 @@ void AutostartManager::setup()
         ConfigIO::writeFile(getAutostartPath(), conf->getConfigMap(), "[Desktop Entry]");
     }
 #endif
+#endif
 }
 
 bool AutostartManager::isEnabled()
@@ -111,7 +141,12 @@ bool AutostartManager::isEnabled()
 #ifdef USE_PORTALS
     return AppConfig::instance().get<bool>(AppConfig::AutoStartEnabled);
 #else
+#ifdef _WIN32
+    QSettings settings(AUTOSTART_REGISTRY_PATH, QSettings::NativeFormat);
+    return settings.contains(AUTOSTART_KEY);
+#else
     return QFile::exists(getAutostartPath());
+#endif
 #endif
 }
 

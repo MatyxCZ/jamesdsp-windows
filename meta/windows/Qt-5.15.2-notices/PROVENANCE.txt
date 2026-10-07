@@ -1,0 +1,52 @@
+Acquisition provenance: Qt 5.15.2 notices
+========================================
+
+These notices were acquired from official Qt GitHub repositories, not from
+the current Qt 5 documentation website (which describes a later 5.15 patch).
+No license grant is changed by this collection. The source copyright and
+license terms remain applicable to their respective original components.
+
+qtbase
+Official release tag: https://github.com/qt/qtbase/tree/v5.15.2
+Acquisition archive: https://codeload.github.com/qt/qtbase/zip/refs/tags/v5.15.2
+Upstream .tag revision: 40143c189b7c1bf3c2058b77d00ea5c4e3be8b28
+Pinned source: https://github.com/qt/qtbase/tree/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28
+
+qtsvg
+Official release tag: https://github.com/qt/qtsvg/tree/v5.15.2
+Acquisition archive: https://codeload.github.com/qt/qtsvg/zip/refs/tags/v5.15.2
+Upstream .tag revision: 52d3788c7b0116ea3db232dccca5f1e3f1e229ac
+Pinned source: https://github.com/qt/qtsvg/tree/52d3788c7b0116ea3db232dccca5f1e3f1e229ac
+
+qtimageformats
+Official release tag: https://github.com/qt/qtimageformats/tree/v5.15.2
+Acquisition archive: https://codeload.github.com/qt/qtimageformats/zip/refs/tags/v5.15.2
+Upstream .tag revision: 74a5bc4a45195b876454e596e76cb23aeb365410
+Pinned source: https://github.com/qt/qtimageformats/tree/74a5bc4a45195b876454e596e76cb23aeb365410
+
+Collection scope and method
+---------------------------
+All src/**/qt_attribution.json manifests from these three modules are retained.
+ATTRIBUTIONS.txt repeats their component names, applicable copyright statements,
+license identifiers and source locations for convenient human-readable use.
+Every referenced LicenseFile is copied at its original module-relative path.
+FreeType docs/FTL.TXT and GPLv2.TXT are included because docs/LICENSE.TXT
+references both. Standard open-source LICENSE.* distribution texts from the
+tagged modules are included as well. Text is normalized only to LF and a
+terminal newline; copyright and license wording is not rewritten.
+
+The collection includes a conservative superset (for example, non-Windows
+platforms and optional plugins) to keep windeployqt plugin discovery covered.
+In particular, qtimageformats TIFF/WebP notices are included whether or not
+those optional image plugins are deployed. Disabled components need not be
+enabled to use or redistribute this collection.
+
+The JamesDSP portable package uses QWidget/QPainter rendering and deliberately
+excludes the optional Mesa/LLVM opengl32sw.dll via windeployqt --no-opengl-sw.
+ANGLE notices remain included for the normal Qt Windows GUI deployment.
+
+This collection does not cover separate third-party binaries supplied outside
+these three tagged source modules, such as an independently built Mesa/LLVM
+opengl32sw.dll software rasterizer or separately supplied OpenSSL binaries.
+Distributors adding those binaries must retain their matching vendor notices.
+

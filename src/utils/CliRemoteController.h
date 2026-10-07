@@ -3,7 +3,11 @@
 
 #include <QObject>
 
+#ifdef _WIN32
+#include "utils/PipeIPCHandler.h"
+#else
 #include "utils/dbus/ClientProxy.h"
+#endif
 
 class CliRemoteController : public QObject
 {
@@ -23,7 +27,11 @@ public:
     bool showStatus() const;
 
 private:
+#ifdef _WIN32
+    PipeIPCClient* service = nullptr;
+#else
     me::timschneeberger::jdsp4linux::Service* service;
+#endif
 
     bool checkConnectionAndLog() const;
     bool requireConnectionAndLog() const;

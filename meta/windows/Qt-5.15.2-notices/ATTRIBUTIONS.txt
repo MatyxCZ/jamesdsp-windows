@@ -1,0 +1,650 @@
+Qt 5.15.2 third-party attributions
+=================================
+
+This is a conservative superset of notices from qtbase, qtsvg and qtimageformats.
+An entry does not imply that its component is enabled or linked in this Windows build.
+Copyright/license wording below is from the original v5.15.2 attribution manifests.
+Original manifests and the referenced license texts are preserved alongside this file.
+
+Vulkan Memory Allocator [VulkanMemoryAllocator]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/VulkanMemoryAllocator/qt_attribution.json
+Version: 2.2.0
+QtUsage: Memory management for the Vulkan backend of QRhi.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (c) 2017-2018 Advanced Micro Devices, Inc. All rights reserved.
+License text: qtbase/src/3rdparty/VulkanMemoryAllocator/LICENSE.txt
+
+Native Style for Android [android-native-style]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/android/qt_attribution.json
+QtUsage: Used in Android platform plugin.
+License: Apache License 2.0
+LicenseId: Apache-2.0
+Copyright: Copyright (C) 2005 The Android Open Source Project
+License text: qtbase/src/3rdparty/android/LICENSE
+
+ANGLE Library [angle]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/angle/qt_attribution.json
+Version: chromium/3280
+QtUsage: Used on Windows to implement OpenGL ES on top of DirectX. Configure with -no-opengl, or -opengl desktop to exclude.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (C) 2002-2013 The ANGLE Project Authors
+License text: qtbase/src/3rdparty/angle/LICENSE
+
+ANGLE: Array Bounds Clamper for WebKit [angle-arrayboundsclamper]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/angle/qt_attribution.json
+QtUsage: Used on Windows to implement OpenGL ES on top of DirectX. Configure with -no-opengl, or -opengl desktop to exclude.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 2012 Apple Inc.
+License text: qtbase/src/3rdparty/angle/src/third_party/compiler/LICENSE
+
+ANGLE: Murmurhash [angle-murmurhash]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/angle/qt_attribution.json
+QtUsage: Used on Windows to implement OpenGL ES on top of DirectX. Configure with -no-opengl, or -opengl desktop to exclude.
+License: Public Domain
+LicenseId: NONE
+Copyright: MurmurHash3 was written by Austin Appleby, and is placed in the public domain. The author hereby disclaims copyright to this source code.
+
+ANGLE: Systeminfo [angle-systeminfo]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/angle/qt_attribution.json
+QtUsage: Used on Windows to implement OpenGL ES on top of DirectX. Configure with -no-opengl, or -opengl desktop to exclude.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 2009 Apple Inc. All Rights Reserved.
+License text: qtbase/src/3rdparty/angle/SYSTEMINFO_LICENSE
+
+ANGLE: trace_event [angle-trace_event]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/angle/qt_attribution.json
+QtUsage: Used on Windows to implement OpenGL ES on top of DirectX. Configure with -no-opengl, or -opengl desktop to exclude.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 2013 The Chromium Authors.
+License text: qtbase/src/3rdparty/angle/TRACEEVENT_LICENSE
+
+ANGLE: Khronos Headers [angle-khronos]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/angle/qt_attribution.json
+QtUsage: Used on Windows to implement OpenGL ES on top of DirectX. Configure with -no-opengl, or -opengl desktop to exclude.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (c) 2007-2017 The Khronos Group Inc.
+License text: qtbase/src/3rdparty/angle/KHRONOS_LICENSE
+
+Efficient Binary-Decimal and Decimal-Binary Conversion Routines for IEEE Doubles [doubleconversion]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/double-conversion/qt_attribution.json
+Version: 3.1.5
+QtUsage: Used in Qt Core. Configure with -system-doubleconversion or -no-doubleconversion to avoid.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright 2006-2012, the V8 project authors
+License text: qtbase/src/3rdparty/double-conversion/LICENSE
+
+Easing Equations by Robert Penner [easing]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/easing/qt_attribution.json
+QtUsage: Used in Qt Core (QEasingCurve).
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 2001 Robert Penner
+License text: qtbase/src/3rdparty/easing/LICENSE
+
+forkfd [forkfd]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/forkfd/qt_attribution.json
+QtUsage: Used on most Unix platforms in Qt Core.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (C) 2016 Intel Corporation
+Copyright (C) 2015 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com
+License text: qtbase/src/3rdparty/forkfd/LICENSE
+
+FreeBSD strtoll and strtoull [freebsd]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/freebsd/qt_attribution.json
+Version: 18b29f3fb8abee5d57ed8f4a44f806bec7e0eeff
+QtUsage: Used in Qt Core.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 1992, 1993 The Regents of the University of California.
+Copyright (c) 2011 The FreeBSD Foundation
+License text: qtbase/src/3rdparty/freebsd/LICENSE
+
+Freetype 2 [freetype]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/freetype/qt_attribution.json
+Version: 2.10.1
+QtUsage: Optionally used in Qt GUI and platform plugins. Configure with -no-freetype, or -system-freetype to avoid.
+License: Freetype Project License or GNU General Public License v2.0 only
+LicenseId: FTL OR GPL-2.0
+Copyright: Copyright 2006-2015 by David Turner, Robert Wilhelm, and Werner Lemberg.
+License text: qtbase/src/3rdparty/freetype/LICENSE.txt
+
+Freetype 2 - zlib [freetype-zlib]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/freetype/qt_attribution.json
+QtUsage: Optionally used in Qt GUI and platform plugins. Configure with -no-freetype, or -system-freetype to avoid.
+License: zlib License
+LicenseId: Zlib
+Copyright: Copyright (C) 1995-2002 Jean-loup Gailly and Mark Adler
+License text: qtbase/src/3rdparty/freetype/ZLIB-LICENSE.txt
+
+Freetype 2 - Bitmap Distribution Format (BDF) support [freetype-bdf]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/freetype/qt_attribution.json
+QtUsage: Optionally used in Qt GUI and platform plugins. Configure with -no-freetype, or -system-freetype to avoid.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (C) 2001-2002 by Francesco Zappa Nardelli
+Copyright 2000 Computing Research Labs, New Mexico State University
+Copyright 2001-2002, 2011 Francesco Zappa Nardelli
+License text: qtbase/src/3rdparty/freetype/BDF-LICENSE.txt
+
+Freetype 2 - Portable Compiled Format (PCF) support [freetype-pcf]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/freetype/qt_attribution.json
+QtUsage: Optionally used in Qt GUI and platform plugins. Configure with -no-freetype, or -system-freetype to avoid.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (C) 2000 by Francesco Zappa Nardelli
+License text: qtbase/src/3rdparty/freetype/PCF-LICENSE.txt
+
+Gradle wrapper [android-gradle-wrapper]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/gradle/qt_attribution.json
+Version: 3.4.1
+QtUsage: Needed to create Android packages
+License: Apache License 2.0
+LicenseId: Apache-2.0
+Copyright: Copyright (C) 2017 Gradle Inc.
+License text: qtbase/src/3rdparty/gradle/LICENSE-GRADLEW.txt
+
+HarfBuzz-NG [harfbuzz-ng]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/harfbuzz-ng/qt_attribution.json
+Version: 1.7.4
+QtUsage: Optionally used in Qt GUI. Configure with -system-harfbuzz to force the use of the system library, or -qt-harfbuzz to link statically to the library that is bundled with your Qt version.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright © 2010,2011,2012  Google, Inc.
+Copyright © 2012  Mozilla Foundation
+Copyright © 2011  Codethink Limited
+Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
+Copyright © 2009  Keith Stribley
+Copyright © 2009  Martin Hosken and SIL International
+Copyright © 2007  Chris Wilson
+Copyright © 2006  Behdad Esfahbod
+Copyright © 2005  David Turner
+Copyright © 2004,2007,2008,2009,2010  Red Hat, Inc.
+Copyright © 1998-2004  David Turner and Werner Lemberg
+
+License text: qtbase/src/3rdparty/harfbuzz-ng/COPYING
+
+HarfBuzz [harfbuzz]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/harfbuzz/qt_attribution.json
+QtUsage: Optionally used in Qt GUI. Configure with -system-harfbuzz to force the use of the system library, or -no-harfbuzz to disable the use of HarfBuzz entirely.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
+Copyright © 2006  Behdad Esfahbod
+Copyright © 2005  David Turner
+Copyright © 2004,2007,2008,2009,2010  Red Hat, Inc.
+Copyright © 1998-2004  David Turner and Werner Lemberg
+License text: qtbase/src/3rdparty/harfbuzz/COPYING
+
+IAccessible2 IDL Specification [iaccessible2]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/iaccessible2/qt_attribution.json
+Version: 1.3.0
+QtUsage: Optionally used in the Windows platform plugin. Configure with -no-accessibility to avoid.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 2000, 2006 Sun Microsystems, Inc.
+Copyright (c) 2006 IBM Corporation
+Copyright (c) 2007, 2010, 2012, 2013 Linux Foundation
+
+IAccessible2 is a trademark of the Linux Foundation. The IAccessible2 mark may be used in accordance with the Linux Foundation Trademark Policy to indicate compliance with the IAccessible2 specification.
+License text: qtbase/src/3rdparty/iaccessible2/LICENSE
+
+sRGB color profile icc file [icc-sRGB-color-profile]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/icc/qt_attribution.json
+QtUsage: Used in Qt Gui (Embedded into PDF/A-1b files generated by QPrinter/QPdfWriter).
+License: International Color Consortium License
+LicenseId: ICC License
+Copyright: Copyright International Color Consortium, 2015
+License text: qtbase/src/3rdparty/icc/LICENSE.txt
+
+LibJPEG-turbo [libjpeg]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/libjpeg/qt_attribution.json
+Version: 2.0.5
+QtUsage: Used in the qjpeg image plugin. Configure with -system-libjpeg or -no-libjpeg to avoid.
+License: Independent JPEG Group License
+LicenseId: IJG
+Copyright: Copyright (C) 2009-2020 D. R. Commander
+Copyright (C) 2011-2016 Siarhei Siamashka
+Copyright (C) 2015-2016, 2018 Matthieu Darbois
+Copyright (C) 2015 Intel Corporation
+Copyright (C) 2015 Google, Inc.
+Copyright (C) 2013-2014 MIPS Technologies, Inc.
+Copyright (C) 2013 Linaro Limited
+Copyright (C) 2009-2011 Nokia Corporation and/or its subsidiary(-ies)
+Copyright (C) 2009 Pierre Ossman for Cendio AB
+Copyright (C) 1999-2006 MIYASAKA Masaru
+Copyright (C) 1991-2016 Thomas G. Lane, Guido Vollbeding
+License text: qtbase/src/3rdparty/libjpeg/LICENSE
+
+LibPNG [libpng]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/libpng/qt_attribution.json
+Version: 1.6.37
+QtUsage: Used in the qpng image plugin. Configure with -system-libpng or -no-libpng to avoid.
+License: libpng License and PNG Reference Library version 2
+LicenseId: Libpng AND libpng-2.0
+Copyright: Copyright (c) 1998-2018 Glenn Randers-Pehrson
+Copyright (c) 2000-2017 Simon-Pierre Cadieux
+Copyright (c) 2000-2017 Eric S. Raymond
+Copyright (c) 2000-2017 Mans Rullgard
+Copyright (c) 2000-2019 Cosmin Truta
+Copyright (c) 2000-2017 Gilles Vollant
+Copyright (c) 2000-2017 James Yu
+Copyright (c) 2000-2017 Mandar Sahastrabuddhe
+Copyright (c) 1998-2000 Tom Lane
+Copyright (c) 1998-2000 Willem van Schaik
+Copyright (c) 1996-1997 Andreas Dilger
+Copyright (c) 1996-1997 John Bowler
+Copyright (c) 1996-1997 Kevin Bracey
+Copyright (c) 1996-1997 Sam Bushell
+Copyright (c) 1996-1997 Magnus Holmgren
+Copyright (c) 1996-1997 Greg Roelofs
+Copyright (c) 1996-1997 Tom Tanner
+Copyright (c) 1995-1996 Dave Martindale
+Copyright (c) 1995-1996 Paul Schmidt
+Copyright (c) 1995-1996 Tim Wegner
+Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+License text: qtbase/src/3rdparty/libpng/LICENSE
+
+MD4 [md4]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/md4/qt_attribution.json
+QtUsage: Used in Qt Core (QCryptographicHash). Configure with -DQT_CRYPTOGRAPHICHASH_ONLY_SHA1 to avoid.
+License: Public Domain
+Copyright: Written by Alexander Peslyak - better known as Solar Designer <solar@openwall.com> - in 2001, and placed in the public domain. There's absolutely no warranty.
+
+MD4C [md4c]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/md4c/qt_attribution.json
+Version: 0.4.3
+QtUsage: Optionally used in QTextDocument if configured with textmarkdownreader.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright © 2016-2020 Martin Mitáš
+License text: qtbase/src/3rdparty/md4c/LICENSE.md
+
+MD5 [md5]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/md5/qt_attribution.json
+QtUsage: Used in Qt Core (QCryptographicHash). Configure with -DQT_CRYPTOGRAPHICHASH_ONLY_SHA1 to avoid.
+License: Public Domain
+Copyright: Written by Colin Plumb in 1993, no copyright is claimed.
+Ian Jackson <ian@chiark.greenend.org.uk>.
+
+PCRE2 [pcre2]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/pcre2/qt_attribution.json
+Version: 10.35
+QtUsage: Optionally used in Qt Core (QRegularExpression). Configure with -system-pcre or -no-pcre to avoid.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 1997-2020 University of Cambridge
+Copyright (c) 2010-2020 Zoltan Herczeg
+License text: qtbase/src/3rdparty/pcre2/LICENCE
+
+PCRE2 - Stack-less Just-In-Time Compiler [pcre2-sljit]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/pcre2/qt_attribution.json
+Version: 10.35
+QtUsage: Optionally used in Qt Core (QRegularExpression). Configure with -system-pcre or -no-pcre to avoid.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (c) 2009-2020 Zoltan Herczeg
+Copyright 2013-2013 Tilera Corporation(jiwang@tilera.com)
+License text: qtbase/src/3rdparty/pcre2/LICENCE-SLJIT
+
+Pixman [pixman]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/pixman/qt_attribution.json
+Version: 0.17.12
+QtUsage: Used in Qt GUI on ARM NEON.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright © 2009 Nokia Corporation
+License text: qtbase/src/3rdparty/pixman/LICENSE
+
+Secure Hash Algorithms SHA-384 and SHA-512 [rfc6234]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/rfc6234/qt_attribution.json
+QtUsage: Used in Qt Core (QCryptographicHash and QMessageAuthenticationCode)
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 2011 IETF Trust and the persons identified as authors of the code.
+License text: qtbase/src/3rdparty/rfc6234/LICENSE
+
+Secure Hash Algorithm SHA-1 [sha1]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/sha1/qt_attribution.json
+QtUsage: Used in Qt Core (QCryptographicHash).
+License: Public Domain
+Copyright: Copyright (C) Dominik Reichl <dominik.reichl@t-online.de>
+Copyright (C) 2016 The Qt Company Ltd
+
+Secure Hash Algorithm SHA-3 - brg_endian [sha3_endian]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/sha3/qt_attribution.json
+Version: https://github.com/BrianGladman/sha/ commit 4b9e13ead2c5b5e41ca27c65de4dd69ae0bac228
+QtUsage: Used in Qt Core (QCryptographicHash).
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (c) 1998-2013, Brian Gladman, Worcester, UK. All rights reserved.
+License text: qtbase/src/3rdparty/sha3/BRG_ENDIAN_LICENSE
+
+Secure Hash Algorithm SHA-3 - Keccak [sha3_keccak]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/sha3/qt_attribution.json
+Version: 3.2
+QtUsage: Used in Qt Core (QCryptographicHash).
+License: Creative Commons Zero v1.0 Universal
+LicenseId: CC0-1.0
+Copyright: Guido Bertoni, Joan Daemen, Michaël Peeters and Gilles Van Assche.
+
+To the extent possible under law, the implementers have waived all copyright
+and related or neighboring rights to the source code in this file.
+License text: qtbase/src/3rdparty/sha3/CC0_LICENSE
+
+SQLite [sqlite]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/sqlite/qt_attribution.json
+Version: 3.33.0
+QtUsage: Used in Qt SQL Lite plugin. Configure Qt with -system-sqlite or -no-sqlite to avoid.
+License: Public Domain
+Copyright: The authors disclaim copyright to the source code. However, a license can be obtained if needed.
+
+TinyCBOR [tinycbor]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/tinycbor/qt_attribution.json
+Version: 0.6+patches
+QtUsage: Used for QCborStreamReader and QCborStreamWriter.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (C) 2015-2019 Intel Corporation
+License text: qtbase/src/3rdparty/tinycbor/LICENSE
+
+Bitstream Vera Font [vera_font]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/wasm/qt_attribution.json
+Version: 1.10
+QtUsage: Used for WebAssembly platform.
+License: Bitstream Vera Font License
+LicenseId: urn:dje:license:bitstream
+Copyright: Copyright (C) 2003 Bitstream,Inc
+License text: qtbase/src/3rdparty/wasm/VERA-LICENSE
+
+DejaVu Fonts [dejayvu]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/wasm/qt_attribution.json
+Version: 2.37
+QtUsage: Used for WebAssembly platform.
+License: Bitstream Vera Font License
+LicenseId: urn:dje:license:bitstream
+Copyright: Copyright (c) 2003 by Bitstream, Inc
+Copyright (c) 2006 by Tavmjong Bah
+(c) American Mathematical Society
+License text: qtbase/src/3rdparty/wasm/DEJAVU-LICENSE
+
+Wintab API [wintab]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/wintab/qt_attribution.json
+QtUsage: Used in the Qt platform plugin for Windows. Configure with -no-feature-tabletevent to avoid.
+License: LCS-Telegraphics License
+LicenseId: urn:dje:license:lcs-telegraphics
+Copyright: Copyright 1991-1998 by LCS/Telegraphics.
+License text: qtbase/src/3rdparty/wintab/LICENSE.txt
+
+XCB-XInput [xcb-xinput]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/xcb/qt_attribution.json
+QtUsage: Used in XCB platform plugin if xcb-xinput was not present on the system
+ during Qt configuration or -bundled-xcb-xinput switch was used. To force using xcb-xinput from
+ the system, pass -no-bundled-xcb-xinput.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (C) 2001-2006 Bart Massey, Jamey Sharp, and Josh Triplett.
+Copyright (C) 2006 Peter Hutterer
+Copyright (C) 2013 Daniel Martin
+License text: qtbase/src/3rdparty/xcb/LICENSE
+
+Data Compression Library (zlib) [zlib]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/3rdparty/zlib/qt_attribution.json
+Version: 1.2.11
+QtUsage: Optionally used in Qt Core and and development tools. Configure with -system-zlib to avoid.
+License: zlib License
+LicenseId: Zlib
+Copyright: (C) 1995-2017 Jean-loup Gailly and Mark Adler
+License text: qtbase/src/3rdparty/zlib/LICENSE
+
+Text Codecs: Big5, Big5-HKSCS [qbig5codecs]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/codecs/qt_attribution.json
+QtUsage: Used in Qt Core if ICU is not used. Configure with -icu to avoid.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 2000  Ming-Che Chuang
+Copyright (C) 2001, 2002  James Su, Turbolinux Inc.
+Copyright (C) 2002  WU Yi, HancomLinux Inc.
+Copyright (C) 2001, 2002  Anthony Fok, ThizLinux Laboratory Ltd.
+License text: qtbase/src/corelib/codecs/QBIG5CODEC_LICENSE.txt
+
+Text Codec: EUC-JP [qeucjpcodec]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/codecs/qt_attribution.json
+QtUsage: Used in Qt Core if ICU is not used. Configure with -icu to avoid.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 1999 Serika Kurusugawa.
+License text: qtbase/src/corelib/codecs/QEUCJPCODEC_LICENSE.txt
+
+Text Codec: EUC-KR [qeuckrcodec]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/codecs/qt_attribution.json
+QtUsage: Used in Qt Core if ICU is not used. Configure with -icu to avoid.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 1999-2000 Mizi Research Inc.
+License text: qtbase/src/corelib/codecs/QEUCKRCODEC_LICENSE.txt
+
+Text Codec: ISO 2022-JP (JIS) [qjiscodec]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/codecs/qt_attribution.json
+QtUsage: Used in Qt Core if ICU is not used. Configure with -icu to avoid.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 1999 Serika Kurusugawa.
+License text: qtbase/src/corelib/codecs/QJISCODEC_LICENSE.txt
+
+Text Codec: Shift-JIS [qsjiscodec]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/codecs/qt_attribution.json
+QtUsage: Used in Qt Core if ICU is not used. Configure with -icu to avoid.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 1999 Serika Kurusugawa.
+License text: qtbase/src/corelib/codecs/QSJISCODEC_LICENSE.txt
+
+Text Codec: TSCII [qtsciicodec]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/codecs/qt_attribution.json
+QtUsage: Used in Qt Core.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 2000 Hans Petter Bieker.
+License text: qtbase/src/corelib/codecs/QTSCIICODEC_LICENSE.txt
+
+Text Codec: GBK [qbkcodec]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/codecs/qt_attribution.json
+QtUsage: Used in Qt Core if ICU is not used. Configure with -icu to avoid.
+License: BSD 2-clause "Simplified" License
+LicenseId: BSD-2-Clause
+Copyright: Copyright (C) 2000 TurboLinux, Inc.  Written by Justin Yu and Sean Chen.
+Copyright (C) 2001, 2002 Turbolinux, Inc.  Written by James Su.
+Copyright (C) 2001, 2002 ThizLinux Laboratory Ltd.  Written by Anthony Fok.
+License text: qtbase/src/corelib/codecs/QBKCODEC_LICENSE.txt
+
+The Public Suffix List [psl]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/io/qt_attribution.json
+Version: b880425f09bca902da412bdece4f68e942f3a23b, fetched on 2020-03-13
+QtUsage: Used in Qt Core to avoid setting "supercookies" in the cookie jar
+supported by Qt (by the QNetworkCookieJar class).
+License: Mozilla Public License 2.0
+LicenseId: MPL-2.0
+Copyright: The list was originally provided by Jo Hermans <jo.hermans@gmail.com>.
+It is now maintained on github (https://github.com/publicsuffix/list).
+License text: qtbase/src/corelib/io/PSL-LICENSE.txt
+
+QEventDispatcher on macOS [qeventdispatcher_cf]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/kernel/qt_attribution.json
+QtUsage: Used in Qt Core on macOS.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 2007-2008, Apple, Inc.
+License text: qtbase/src/corelib/kernel/QEVENTDISPATCHER_CF_LICENSE.txt
+
+Unicode Character Database (UCD) [unicode-character-database]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/text/qt_attribution.json
+Version: 26
+QtUsage: Qt Core uses data obtained from UCD files for working with characters and strings.
+License: Unicode License Agreement - Data Files and Software (2016)
+LicenseId: Unicode-DFS-2016
+Copyright: Copyright (C) 1991-2018 Unicode, Inc.
+License text: qtbase/src/corelib/text/UNICODE_LICENSE.txt
+
+Unicode Common Locale Data Repository (CLDR) [unicode-cldr]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/corelib/text/qt_attribution.json
+Version: v36
+QtUsage: Used in Qt Core (QTimeZone, QLocale).
+License: Unicode License Agreement - Data Files and Software (2016)
+LicenseId: Unicode-DFS-2016
+Copyright: Copyright (C) 1991-2019 Unicode, Inc.
+License text: qtbase/src/corelib/text/UNICODE_LICENSE.txt
+
+libdus-1 headers [libdbus-1-headers]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/dbus/qt_attribution.json
+Version: dbus-1.13.12
+QtUsage: Qt D-Bus uses constants and typedefs from libdbus-1 headers.
+License: Academic Free License v2.1, or GNU General Public License v2.0 or later
+LicenseId: AFL-2.1 OR GPL-2.0-or-later
+Copyright: Copyright (C) 2002, 2003 CodeFactory AB
+Copyright (C) 2004, 2005 Red Hat, Inc.
+License text: qtbase/src/dbus/LIBDBUS-1-LICENSE.txt
+
+OpenGL Headers [opengl-headers]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/gui/opengl/qt_attribution.json
+Version: Revision 27684
+QtUsage: Used on Windows and Linux in the OpenGL related headers of Qt GUI.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (c) 2013-2014 The Khronos Group Inc.
+License text: qtbase/src/gui/opengl/KHRONOS_LICENSE.txt
+
+OpenGL ES 2 Headers [opengl-es2-headers]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/gui/opengl/qt_attribution.json
+Version: Revision 27673
+QtUsage: Used on Windows and Linux in the OpenGL related headers of Qt GUI.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (c) 2013-2014 The Khronos Group Inc.
+License text: qtbase/src/gui/opengl/KHRONOS_LICENSE.txt
+
+Anti-aliasing rasterizer from FreeType 2 [grayraster]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/gui/painting/qt_attribution.json
+QtUsage: Used in Qt GUI.
+License: Freetype Project License or GNU General Public License v2.0 only
+LicenseId: FTL or GPL-2.0
+Copyright: Copyright 2000-2016 by David Turner, Robert Wilhelm, and Werner Lemberg.
+License text: qtbase/src/3rdparty/freetype/docs/LICENSE.TXT
+
+Smooth Scaling Algorithm [smooth-scaling-algorithm]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/gui/painting/qt_attribution.json
+QtUsage: Used in Qt Gui (QImage::transformed() functions).
+License: BSD 2-clause "Simplified" License and Imlib2 License
+LicenseId: BSD-2-Clause AND Imlib2
+Copyright: Copyright (C) 2004, 2005 Daniel M. Duley.
+    (C) Carsten Haitzler and various contributors.
+    (C) Willem Monsuwe <willem@stack.nl>
+License text: qtbase/src/gui/painting/QIMAGETRANSFORM_LICENSE.txt
+
+WebGradients [webgradients]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/gui/painting/qt_attribution.json
+QtUsage: Used in Qt GUI to provide presets for QGradient.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (c) 2017 itmeo
+License text: qtbase/src/gui/painting/WEBGRADIENTS_LICENSE.txt
+
+X Server helper [xserverhelper]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/gui/painting/qt_attribution.json
+QtUsage: Used in Qt GUI (QRegion).
+License: X11 License and Historical Permission Notice and Disclaimer
+LicenseId: X11 AND HPND
+Copyright: Copyright (c) 1987, 1988 X Consortium
+Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+License text: qtbase/src/gui/painting/XCONSORTIUM_LICENSE.txt
+
+Adobe Glyph List For New Fonts [aglfn]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/gui/text/qt_attribution.json
+Version: 1.7
+QtUsage: Used by PDF generator to make it easier for reader applications to resolve  the original contents of rendered text.
+License: BSD 3-Clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright 2002, 2003, 2005, 2006, 2008, 2010, 2015 Adobe Systems
+License text: qtbase/src/gui/text/AGLFN_LICENSE.txt
+
+Vulkan API Registry [vulkan-xml-spec]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/gui/vulkan/qt_attribution.json
+Version: 1.0.39
+QtUsage: Used to dynamically generate the sources for the QVulkan(Device)Functions classes.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (c) 2015-2017 The Khronos Group Inc.
+License text: qtbase/src/gui/vulkan/KHRONOS_LICENSE.txt
+
+Cocoa Platform Plugin [cocoa-platform-plugin]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/plugins/platforms/cocoa/qt_attribution.json
+QtUsage: Code used in the Qt Platform Abstraction (QPA) for macOS.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 2007-2008, Apple, Inc.
+License text: qtbase/src/plugins/platforms/cocoa/COCOA_LICENSE.txt
+
+Valgrind [valgrind]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/testlib/3rdparty/qt_attribution.json
+Version: 3.14.0
+QtUsage: Used on Linux ond MacOS in the Qt Test module.
+License: BSD 4-clause "Original" or "Old" License
+LicenseId: BSD-4-Clause
+Copyright: Copyright (C) 2000-2017 Julian Seward
+Copyright (C) 2003-2017 Josef Weidendorfer.
+License text: qtbase/src/testlib/3rdparty/VALGRIND_LICENSE.txt
+
+Cycle [cycle]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/testlib/3rdparty/qt_attribution.json
+QtUsage: Used in the Qt Test module.
+License: MIT License
+LicenseId: MIT
+Copyright: Copyright (c) 2003, 2006 Matteo Frigo
+Copyright (c) 2003, 2006 Massachusetts Institute of Technology
+License text: qtbase/src/testlib/3rdparty/CYCLE_LICENSE.txt
+
+Linux Performance Events [linuxperf]
+Source: https://github.com/qt/qtbase/blob/40143c189b7c1bf3c2058b77d00ea5c4e3be8b28/src/testlib/3rdparty/qt_attribution.json
+Version: 3.7
+QtUsage: Used on Linux and Android in the Qt Test module. Note that this is a copy of the respective Linux header, and the clarifications of the Linux Syscall Note apply.
+License: GNU General Public License v2.0 only with Linux Syscall Note
+LicenseId: GPL-2.0 WITH Linux-syscall-note
+Copyright: Copyright (C) 2008-2009, Thomas Gleixner <tglx@linutronix.de>
+Copyright (C) 2008-2011, Red Hat, Inc., Ingo Molnar
+Copyright (C) 2008-2011, Red Hat, Inc., Peter Zijlstra
+License text: qtbase/src/testlib/3rdparty/LINUX_LICENSE.txt
+
+XSVG [xsvg]
+Source: https://github.com/qt/qtsvg/blob/52d3788c7b0116ea3db232dccca5f1e3f1e229ac/src/svg/qt_attribution.json
+QtUsage: Used in the Qt SVG library.
+License: Historical Permission Notice and Disclaimer - sell variant
+LicenseId: HPND-sell-variant
+Copyright: Copyright 2002 USC/Information Sciences Institute
+License text: qtsvg/src/svg/XSVG_LICENSE.txt
+
+TIFF Software Distribution (libtiff) [libtiff]
+Source: https://github.com/qt/qtimageformats/blob/74a5bc4a45195b876454e596e76cb23aeb365410/src/3rdparty/libtiff/qt_attribution.json
+Version: 4.1.0
+QtUsage: Used in the qtiff image plugin if no system libtiff is found.
+License: libtiff License
+LicenseId: libtiff
+Copyright: Copyright (c) 1988-1997 Sam Leffler
+Copyright (c) 1991-1997 Silicon Graphics, Inc.
+License text: qtimageformats/src/3rdparty/libtiff/COPYRIGHT
+
+WebP (libwebp) [libwebp]
+Source: https://github.com/qt/qtimageformats/blob/74a5bc4a45195b876454e596e76cb23aeb365410/src/3rdparty/libwebp/qt_attribution.json
+Version: 1.1.0
+QtUsage: Used in the qwebp image plugin if no system libwebp is found.
+License: BSD 3-clause "New" or "Revised" License
+LicenseId: BSD-3-Clause
+Copyright: Copyright (c) 2010, Google Inc. All rights reserved.
+License text: qtimageformats/src/3rdparty/libwebp/COPYING
+

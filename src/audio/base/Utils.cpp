@@ -3,8 +3,12 @@
 #include <random>
 #include <utility>
 #include <filesystem>
+#ifndef _WIN32
 #include <glib-object.h>
 #include <glib.h>
+#else
+#include <QTimer>
+#endif
 #include "utils/Log.h"
 
 int util::random_number(int max)
@@ -61,7 +65,11 @@ void util::info(const std::string& s, source_location location) {
   Log::information(QString::fromStdString(s), location);
 }
 
+
 void util::idle_add(std::function<void()> cb) {
+#ifdef _WIN32
+  QTimer::singleShot(0, cb);
+#else
   struct Data {
     std::function<void()> cb;
   };
@@ -87,7 +95,9 @@ void util::idle_add(std::function<void()> cb) {
                    return G_SOURCE_REMOVE;
                  },
              d);
+#endif
 }
+
 
 void generate_tags(const int& N, const std::string& start_string, const std::string& end_string) {
   auto max_tag_size = 0U;

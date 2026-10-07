@@ -4,12 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml network dbus svg
+QT       += core gui xml network svg
+!win32: QT += dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = jamesdsp
 TEMPLATE = app
+win32: RC_ICONS = ../meta/windows/jamesdsp.ico
 
 UI_DEBUG: DEFINES += UI_DEBUG
 DEBUG_FPE: DEFINES += DEBUG_FPE
@@ -29,6 +31,7 @@ else {
 }
 
 DEFINES += APP_VERSION=$$system(git describe --tags --long --always)
+DEFINES += QTCSV_STATIC_LIB
 DEFINES += JDSP_VERSION=4.01
 
 include(../3rdparty/3rdparty.pri)
@@ -49,8 +52,10 @@ include(subprojects/EELEditor/src/EELEditor.pri)
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
-QMAKE_CFLAGS += "-Wno-unused-variable -Wno-unused-function -Wno-unused-const-variable"
-QMAKE_CXXFLAGS += "-Wno-deprecated-enum-enum-conversion -Wno-missing-field-initializers -Wno-unused-function -Wno-unused-parameter"
+gcc {
+    QMAKE_CFLAGS += "-Wno-unused-variable -Wno-unused-function -Wno-unused-const-variable"
+    QMAKE_CXXFLAGS += "-Wno-deprecated-enum-enum-conversion -Wno-missing-field-initializers -Wno-unused-function -Wno-unused-parameter"
+}
 
 CONFIG += c++2a
 
@@ -98,11 +103,11 @@ SOURCES += \
     utils/DesktopServices.cpp \
     utils/Log.cpp \
     utils/SingleInstanceMonitor.cpp \
-    utils/dbus/ClientProxy.cpp \
-    utils/dbus/IpcHandler.cpp \
-    utils/dbus/ServerAdaptor.cpp \
     utils/OverlayMsgProxy.cpp \
     utils/StyleHelper.cpp
+
+win32: SOURCES += utils/PipeIPCHandler.cpp utils/dbus/IpcHandler.cpp
+else: SOURCES += utils/dbus/ClientProxy.cpp utils/dbus/IpcHandler.cpp utils/dbus/ServerAdaptor.cpp
 
 FORMS += \
     interface/FileSelectionWidget.ui \
@@ -176,14 +181,14 @@ HEADERS += \
     utils/SingleInstanceMonitor.h \
     utils/VersionMacros.h \
     utils/WindowUtils.h \
-    utils/dbus/ClientProxy.h \
-    utils/dbus/IpcHandler.h \
-    utils/dbus/ServerAdaptor.h \
     utils/FindBinary.h \
     utils/OverlayMsgProxy.h \
     utils/StyleHelper.h
 
-!NO_CRASH_HANDLER {
+win32: HEADERS += utils/PipeIPCHandler.h utils/dbus/IpcHandler.h
+else: HEADERS += utils/dbus/ClientProxy.h utils/dbus/IpcHandler.h utils/dbus/ServerAdaptor.h
+
+!win32 {
     HEADERS += \
         crash/airbag.h \
         crash/killer.h \
@@ -246,8 +251,13 @@ unix {
     }
 }
 
+win32 {
+    LIBS += -lole32 -loleaut32 -lavrt -luuid
+    DEFINES += NOMINMAX
+}
 # Link libjamesdsp
 unix:!macx: LIBS += -L$$OUT_PWD/../libjamesdsp -llibjamesdsp
+win32: LIBS += -L$$OUT_PWD/../libjamesdsp/release -llibjamesdsp
 INCLUDEPATH += $$PWD/../libjamesdsp/subtree/Main/libjamesdsp/jni/jamesdsp/jdsp/ \
                $$PWD/../libjamesdsp
 DEPENDPATH += $$PWD/../libjamesdsp

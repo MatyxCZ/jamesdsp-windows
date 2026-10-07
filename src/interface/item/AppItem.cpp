@@ -11,6 +11,9 @@ AppItem::AppItem(AppItemModel* _model, int id, QWidget *parent) :
     id(id)
 {
     ui->setupUi(this);
+#if defined(USE_PULSEAUDIO) || defined(_WIN32)
+    ui->blocklist->hide();
+#endif
 
     // Dummy mode
     if(id == -1)
@@ -20,9 +23,6 @@ AppItem::AppItem(AppItemModel* _model, int id, QWidget *parent) :
 
     model = _model;
 
-#ifdef USE_PULSEAUDIO
-    ui->blocklist->hide();
-#endif
 
     auto node = model->findByNodeId(id);
     if(!node.has_value())

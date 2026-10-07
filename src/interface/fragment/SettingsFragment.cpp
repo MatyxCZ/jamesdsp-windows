@@ -25,6 +25,8 @@
 #include <QSystemTrayIcon>
 #include <QTimer>
 #include <QUrl>
+#include <QScrollArea>
+#include <QVBoxLayout>
 using namespace std;
 
 SettingsFragment::SettingsFragment(TrayIcon *trayIcon,
@@ -45,6 +47,38 @@ SettingsFragment::SettingsFragment(TrayIcon *trayIcon,
     ui->devices->setVisible(false);
     ui->blocklistBox->setVisible(false);
     ui->benchmarkOnBoot->setEnabled(false);
+#endif
+
+#ifdef _WIN32
+    // WASAPI processes the mixed endpoint, not individual applications.
+    ui->blocklistBox->hide();
+    ui->dev_mode_auto->hide();
+    ui->dev_mode_manual->hide();
+    ui->systray_minOnBoot->setText(tr("Start in tray when signing in to Windows"));
+    // The routing instructions must remain readable at the default window size.
+    auto* deviceContent = new QWidget(ui->devices);
+    deviceContent->setLayout(ui->devices->layout());
+    deviceContent->layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    ui->windowsRoutingHelp->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    auto* deviceScroll = new QScrollArea(ui->devices);
+    deviceScroll->setWidgetResizable(true);
+    deviceScroll->setFrameShape(QFrame::NoFrame);
+    deviceScroll->setWidget(deviceContent);
+    auto* deviceLayout = new QVBoxLayout(ui->devices);
+    deviceLayout->setContentsMargins(0, 0, 0, 0);
+    deviceLayout->addWidget(deviceScroll);
+    ui->devices_group->setTitle(tr("JamesDSP output device"));
+    ui->dev_mode_auto->setText(tr("Use Windows default output device (not for VB-Cable routing)"));
+    ui->dev_mode_manual->setText(tr("Manually select device (physical headphones or speakers)"));
+    connect(ui->windowsSoundSettings, &QPushButton::clicked, this, [this] {
+        if (!DesktopServices::openUrl("ms-settings:sound", this))
+        {
+            QMessageBox::warning(this, tr("Windows sound settings"),
+                                 tr("Could not open Windows sound settings. Open Windows Settings > System > Sound manually."));
+        }
+    });
+#else
+    ui->windowsRoutingBox->hide();
 #endif
 
     _paletteEditor->setFixedSize(_paletteEditor->geometry().width(), _paletteEditor->geometry().height());
@@ -182,9 +216,14 @@ void SettingsFragment::refreshDevices()
     _lockslot = true;
 	ui->dev_select->clear();
 
+#ifdef _WIN32
+    ui->dev_mode_manual->setChecked(true);
+    ui->dev_select->setEnabled(true);
+#else
     ui->dev_mode_auto->setChecked(AppConfig::instance().get<bool>(AppConfig::AudioOutputUseDefault));
     ui->dev_mode_manual->setChecked(!AppConfig::instance().get<bool>(AppConfig::AudioOutputUseDefault));
     ui->dev_select->setDisabled(ui->dev_mode_auto->isChecked());
+#endif
 
     auto devices = _audioService->sinkDevices();
 
@@ -467,7 +506,11 @@ void SettingsFragment::onLiveprogAutoExtractToggled()
 
 void SettingsFragment::onGithubLinkClicked()
 {
+#ifdef _WIN32
+    DesktopServices::openUrl("https://github.com/MatyxCZ/jamesdsp-windows", this);
+#else
     DesktopServices::openUrl("https://github.com/Audio4Linux/JDSP4Linux", this);
+#endif
 }
 
 void SettingsFragment::onAeqDatabaseManageClicked()

@@ -5,6 +5,7 @@
 #include "utils/Common.h"
 
 #include <QStandardPaths>
+#include <QSettings>
 
 #define ENCLOSE_QUOTES(x) "\"" + x + "\""
 
@@ -33,6 +34,8 @@ AppConfig::AppConfig()
     DEFINE_KEY(LastWindowGeometry, QByteArray());
 #ifdef USE_PORTALS
     DEFINE_KEY(AutoStartEnabled, false);
+#elif defined(_WIN32)
+    DEFINE_KEY(AutoStartEnabled, QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat).contains("JamesDSP"));
 #else
     DEFINE_KEY(AutoStartEnabled, QFile(AutostartManager::getAutostartPath()).exists());
 #endif

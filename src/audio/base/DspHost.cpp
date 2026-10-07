@@ -171,7 +171,7 @@ void DspHost::updateFirEqualizer(DspConfig *config)
     }
 
     std::string str = chopDoubleQuotes(config->get<QString>(DspConfig::tone_eq)).toStdString();
-    std::vector<string> v;
+    std::vector<std::string> v;
     std::stringstream ss(str);
 
     while (ss.good()) {
@@ -252,7 +252,7 @@ void DspHost::updateCompander(DspConfig *config)
     int tftransforms = config->get<int>(DspConfig::compander_time_freq_transforms);
 
     std::string str = chopDoubleQuotes(config->get<QString>(DspConfig::compander_response)).toStdString();
-    std::vector<string> v;
+    std::vector<std::string> v;
     std::stringstream ss(str);
 
     while (ss.good()) {
@@ -353,7 +353,7 @@ void DspHost::updateConvolver(DspConfig *config)
         if(!waveEditExists) waveEdit = "-80;-100;23;12;17;28";
     }
 
-    std::vector<string> v;
+    std::vector<std::string> v;
     std::stringstream ss(waveEdit.toStdString());
 
     while (ss.good()) {

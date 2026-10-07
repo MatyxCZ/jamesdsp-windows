@@ -1,5 +1,6 @@
 #ifndef BACKTRACE_H
 #define BACKTRACE_H
+#ifndef _WIN32
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -207,4 +208,5 @@ static void printBacktrace(int fd, const char * execname)
     }
     free (stackFrameStrings);
 }
+#endif // _WIN32
 #endif // BACKTRACE_H

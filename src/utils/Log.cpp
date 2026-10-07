@@ -1,10 +1,15 @@
 #include "Log.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QTime>
 #include <filesystem>
 #include <stdio.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #define C_RESET "\u001b[0m"
 #define C_RED "\u001b[31m"
@@ -16,6 +21,41 @@
 
 static QTextStream out(stdout);
 static QTextStream err(stderr);
+#ifdef _WIN32
+// Enable ANSI escape sequence processing on the Windows console so the colour
+// codes emitted above render correctly. When colouredOutput is disabled, plain
+// text is emitted instead, which works on every platform.
+static void enableWindowsConsoleAnsi()
+{
+    static bool enabled = false;
+    if(enabled)
+        return;
+
+    HANDLE handles[] = { GetStdHandle(STD_OUTPUT_HANDLE), GetStdHandle(STD_ERROR_HANDLE) };
+    for(HANDLE h : handles)
+    {
+        if(h == INVALID_HANDLE_VALUE)
+            continue;
+        DWORD mode = 0;
+        if(!GetConsoleMode(h, &mode))
+            continue;
+        SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    }
+
+    enabled = true;
+}
+
+// QFile does not create parent directories; on Windows "/tmp" does not exist,
+// so make sure the log directory exists before writing log files.
+static void ensureLogDirectory()
+{
+    static bool ensured = false;
+    if(ensured)
+        return;
+    QDir().mkpath(QDir::tempPath() + "/jamesdsp");
+    ensured = true;
+}
+#endif
 
 void Log::kernel(const QString &log)
 {
@@ -110,7 +150,12 @@ void Log::write(const QString &log,
         formattedLog = QString("[%1] [%2] %3").arg(QTime::currentTime().toString("hh:mm:ss.zzz")).arg(sev).arg(msg);
 
     if(coloredOutput)
+    {
+#ifdef _WIN32
+        enableWindowsConsoleAnsi();
+#endif
         formattedLog = QString("%1%2%3").arg(color).arg(formattedLog).arg(C_RESET);
+    }
 
     write(formattedLog, false, useStdErr, mode);
 }
@@ -121,6 +166,9 @@ void Log::write(const QString& msg, bool force, bool useStdErr, LoggingMode mode
         mode = loggingMode;
 
     mutex.lock();
+#ifdef _WIN32
+    ensureLogDirectory();
+#endif
 
     QFile file(path());
     if (mode == LM_ALL || mode == LM_FILE)
@@ -278,10 +326,18 @@ void Log::backupLastLog()
 
 QString Log::path()
 {
+#ifdef _WIN32
+    return QDir::tempPath() + "/jamesdsp/application.log";
+#else
     return "/tmp/jamesdsp/application.log";
+#endif
 }
 
 QString Log::pathOld()
 {
+#ifdef _WIN32
+    return QDir::tempPath() + "/jamesdsp/application-prev.log";
+#else
     return "/tmp/jamesdsp/application-prev.log";
+#endif
 }

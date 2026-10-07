@@ -48,7 +48,10 @@ bool PresetRuleTableModel::setData(const QModelIndex &index, const QVariant &val
         };
 
         /* No change */
-        if(backup == rules[index.row()])
+        const auto& current = rules[index.row()];
+        if (backup.deviceName == current.deviceName &&
+            backup.deviceId == current.deviceId &&
+            backup.preset == current.preset)
             return false;
 
         emit dataChanged(index, index.sibling(index.row(), 1));

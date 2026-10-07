@@ -2,6 +2,7 @@
 #define UTIL_HPP
 
 #include <vector>
+#include <array>
 #include <string>
 #include <algorithm>
 #include <map>
@@ -9,15 +10,21 @@
 #include <charconv>
 #include <functional>
 
+#ifdef _MSC_VER
+#include <source_location>
+#else
 #if __cplusplus > 201703L && __has_builtin(__builtin_source_location)
 #include <source_location>
 #elif __cplusplus > 201402L
 #include <experimental/source_location>
 #endif
+#endif
 
 namespace util {
 
-#if __cplusplus > 201703L && __has_builtin(__builtin_source_location)
+#ifdef _MSC_VER
+using source_location = std::source_location;
+#elif __cplusplus > 201703L && __has_builtin(__builtin_source_location)
 using source_location = std::source_location;
 #elif __cpp_lib_experimental_source_location >= 201505
 using source_location = std::experimental::source_location;

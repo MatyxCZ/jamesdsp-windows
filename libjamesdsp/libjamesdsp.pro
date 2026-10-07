@@ -16,7 +16,9 @@ DEBUG_ASAN: CONFIG += sanitizer sanitize_address
 DEFINES += CUSTOM_CMD
 
 # Redirect printf & android logging to our custom handlers
-DEFINES += printf=redirected_printf ANDROID_LOG_INFO=0 DEBUG
+win32: DEFINES += ANDROID_LOG_INFO=0 DEBUG
+else: DEFINES += printf=redirected_printf ANDROID_LOG_INFO=0 DEBUG
+win32: QMAKE_CFLAGS += /FI\"$$PWD/PrintfStdOutExtension.h\"
 
 BASEPATH = $$PWD/subtree/Main/libjamesdsp/jni/jamesdsp/jdsp/
 
@@ -170,6 +172,9 @@ unix {
     LIBDIR = $$absolute_path($$LIBDIR, $$PREFIX)
     target.path = $$LIBDIR
 }
-else: error("Static linking only available on Linux systems")
+win32 {
+    # On Windows, the static library is fine as-is; no install target is set.
+    # (Windows uses WASAPI/named pipes/registry, not PipeWire/PulseAudio/D-Bus.)
+}
 
 !isEmpty(target.path): INSTALLS += target

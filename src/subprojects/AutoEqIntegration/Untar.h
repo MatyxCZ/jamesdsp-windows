@@ -2,11 +2,12 @@
 #define UNTAR_H
 
 #include <QDebug>
-#include <QString>
-#include <QDir>
-
+#ifdef _WIN32
+#include <QProcess>
+#else
 #include <archive.h>
 #include <archive_entry.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +17,28 @@ class Untar
 public:
     static int extract(const QString& qFilename, const QDir& outputPath, QString& returnState)
     {
-        const char* filename = qFilename.toUtf8().constData();
+#ifdef _WIN32
+        QProcess extractor;
+        extractor.start("tar", QStringList() << "-xvf" << qFilename << "-C" << outputPath.path());
+        if (!extractor.waitForStarted() || !extractor.waitForFinished(-1) ||
+            extractor.exitStatus() != QProcess::NormalExit || extractor.exitCode() != 0)
+        {
+            returnState = QString::fromLocal8Bit(extractor.readAllStandardError());
+            if (returnState.trimmed().isEmpty())
+            {
+                if (extractor.error() != QProcess::UnknownError)
+                    returnState = extractor.errorString();
+                else
+                    returnState = QStringLiteral("tar failed with exit code %1 (exit status %2)")
+                                      .arg(extractor.exitCode())
+                                      .arg(static_cast<int>(extractor.exitStatus()));
+            }
+            return 1;
+        }
+        return 0;
+#else
+        const QByteArray filenameBytes = qFilename.toUtf8();
+        const char* filename = filenameBytes.constData();
 
         struct archive *a;
         struct archive *ext;
@@ -82,32 +104,37 @@ public:
         archive_write_close(ext);
         archive_write_free(ext);
         return 0;
+#endif
     }
 
 private:
-    static int
-    copy_data(struct archive *ar, struct archive *aw)
+#ifndef _WIN32
+    static int copy_data(struct archive *ar, struct archive *aw)
     {
         int r;
         const void *buff;
         size_t size;
         int64_t offset;
 
-        for (;;) {
+        for (;;)
+        {
             r = archive_read_data_block(ar, &buff, &size, &offset);
             if (r == ARCHIVE_EOF)
-                return (ARCHIVE_OK);
-            if (r < ARCHIVE_OK) {
+                return ARCHIVE_OK;
+            if (r < ARCHIVE_OK)
+            {
                 qWarning() << "copyData(): " << archive_error_string(ar) << "\n";
-                return (r);
+                return r;
             }
             r = archive_write_data_block(aw, buff, size, offset);
-            if (r < ARCHIVE_OK) {
-                qWarning() << "copyData(): " << archive_error_string(ar) << "\n";
-                return (r);
+            if (r < ARCHIVE_OK)
+            {
+                qWarning() << "copyData(): " << archive_error_string(aw) << "\n";
+                return r;
             }
         }
     }
+#endif
 
 };
 

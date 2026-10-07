@@ -1,7 +1,12 @@
+#ifdef _WIN32
+#include <WasapiAudioService.h>
+#include <WasapiAppManager.h>
+#else
 #ifdef USE_PULSEAUDIO
 #include <PulseAudioService.h>
 #else
 #include <PipewireAudioService.h>
+#endif
 #endif
 
 #include "IAudioService.h"
@@ -28,9 +33,17 @@
 #include "interface/TrayIcon.h"
 #include "utils/AutoStartManager.h"
 #include "utils/Common.h"
+#ifndef _WIN32
 #include "utils/dbus/ClientProxy.h"
 #include "utils/dbus/IpcHandler.h"
 #include "utils/dbus/ServerAdaptor.h"
+#else
+#include "utils/dbus/IpcHandler.h"
+#include "utils/PipeIPCHandler.h"
+#endif
+#ifdef _WIN32
+#include <QProcess>
+#endif
 #include "utils/DebuggerUtils.h"
 #include "utils/Log.h"
 #include "utils/OverlayMsgProxy.h"
@@ -64,10 +77,17 @@ MainWindow::MainWindow(bool     statupInTray,
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+#ifdef _WIN32
+    setWindowTitle(tr("JamesDSP for Windows"));
+#endif
 
     // Prepare audio subsystem
     {
         Log::information("============ Initializing audio service ============");
+#ifdef _WIN32
+        Log::information("Compiled with WASAPI support.");
+        _audioService = new WasapiAudioService();
+#else
 #ifdef USE_PULSEAUDIO
         Log::information("Compiled with PulseAudio support.");
         Log::information("This application flavor does not support PipeWire or its PulseAudio compatibility mode.");
@@ -85,6 +105,17 @@ MainWindow::MainWindow(bool     statupInTray,
         Log::debug("Blocklist mode: " + QString((AppConfig::instance().get<bool>(AppConfig::AudioAppBlocklistInvert) ? "allow" : "block")));
         _audioService = new PipewireAudioService();
 #endif
+#endif
+#ifdef _WIN32
+        connect(static_cast<WasapiAudioService*>(_audioService), &WasapiAudioService::pipelineFailed,
+                this, [this] {
+            QMessageBox::warning(this, tr("Windows audio routing"),
+                                 tr("The audio pipeline could not start. Check that your devices are connected, "
+                                    "set Windows default playback to the virtual cable, and select different "
+                                    "physical headphones or speakers in Settings > Devices. "
+                                    "After correcting routing, use Relink audio pipeline in the three-dot menu."));
+        });
+#endif
         connect(_audioService, &IAudioService::logOutputReceived, this, [](const QString& msg){ Log::kernel(msg); });
         connect(&DspConfig::instance(), &DspConfig::updated, _audioService, &IAudioService::update);
         connect(&DspConfig::instance(), &DspConfig::updatedExternally, _audioService, &IAudioService::update);
@@ -99,6 +130,9 @@ MainWindow::MainWindow(bool     statupInTray,
         _trayIcon            = new TrayIcon(this);
         _ipcHandler          = new IpcHandler(_audioService, this);
         _autostart           = new AutostartManager(this);
+#ifdef _WIN32
+        connect(_ipcHandler->pipeServer(), &PipeIPCServer::raiseWindow, this, &MainWindow::raiseWindow);
+#endif
 
         _appMgrFragment = new FragmentHost<AppManagerFragment*>(new AppManagerFragment(_audioService->appManager(), this), WAF::BottomSide, this);
         _statusFragment = new FragmentHost<StatusFragment*>(new StatusFragment(this), WAF::BottomSide, this);
@@ -409,7 +443,11 @@ MainWindow::MainWindow(bool     statupInTray,
 
         installUnitData();
 
+#ifdef _WIN32
+        if (debuggerIsAttached() || !QFileInfo::exists("ddctoolbox.exe")) { // Workaround: do not call system() when GDB is attached
+#else
         if (debuggerIsAttached() || system("which ddctoolbox > /dev/null 2>&1")) { // Workaround: do not call system() when GDB is attached
+#endif
             connect(ui->ddctoolbox_install, &QAbstractButton::clicked, this, [this]{
                 DesktopServices::openUrl("https://github.com/thepbone/DDCToolbox", this);
             });

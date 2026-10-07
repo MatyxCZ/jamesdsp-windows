@@ -1,10 +1,34 @@
 #ifndef APPNODE_H
 #define APPNODE_H
 
+#ifdef _WIN32
+#include <string>
+#include <stdint.h>
+
+struct WaAppInfo {
+    uint32_t id = 0;
+    std::string name;
+    std::string description;
+    std::string media_class;
+    std::string app_icon_name;
+    std::string media_name;
+    std::string format;
+    bool mute = false;
+    int n_input_ports = 0;
+    int n_output_ports = 0;
+    uint32_t rate = 0;
+    uint32_t n_volume_channels = 0;
+    float latency = 0.0F;
+    float volume = 0.0F;
+    bool wants_to_play = false;
+    bool connected = false;
+};
+#else
 #ifndef USE_PULSEAUDIO
 #include "PwDataTypes.h"
 #else
 #include "PulseDataTypes.h"
+#endif
 #endif
 
 #include <QString>
@@ -17,7 +41,32 @@ class AppNode {
 public:
     AppNode(){};
 
-#ifndef USE_PULSEAUDIO
+#ifdef _WIN32
+    AppNode(WaAppInfo node)
+    {
+        id = node.id;
+        name = QSTR(node.name);
+        description = QSTR(node.description);
+        media_class = QSTR(node.media_class);
+        app_icon_name = QSTR(node.app_icon_name);
+        media_name = QSTR(node.media_name);
+        format = QSTR(node.format);
+        mute = node.mute;
+        n_input_ports = node.n_input_ports;
+        n_output_ports = node.n_output_ports;
+        rate = node.rate;
+        n_volume_channels = node.n_volume_channels;
+        latency = node.latency;
+        volume = node.volume;
+
+        if(node.wants_to_play)
+            state = QObject::tr("running");
+        else if(node.connected)
+            state = QObject::tr("idle");
+        else
+            state = QObject::tr("not connected");
+    }
+#elif !defined(USE_PULSEAUDIO)
     AppNode(NodeInfo node)
     {
         id = node.id;

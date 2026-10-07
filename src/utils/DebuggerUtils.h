@@ -1,14 +1,21 @@
 #ifndef DEBUGGERUTILS_H
 #define DEBUGGERUTILS_H
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/stat.h>
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
+#endif
 
 bool debuggerIsAttached()
 {
+#ifdef _WIN32
+    return IsDebuggerPresent() != 0;
+#else
     char buf[4096];
 
     const int status_fd = ::open("/proc/self/status", O_RDONLY);
@@ -36,5 +43,6 @@ bool debuggerIsAttached()
     }
 
     return false;
+#endif
 }
 #endif // DEBUGGERUTILS_H

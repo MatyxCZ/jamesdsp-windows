@@ -48,7 +48,6 @@ class SingleInstanceMonitor;
 class StatusFragment;
 class IpcHandler;
 
-using namespace std;
 namespace Ui
 {
 	class MainWindow;

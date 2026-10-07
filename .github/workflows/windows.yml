@@ -1,0 +1,48 @@
+name: Windows portable build
+
+on:
+  push:
+    branches: [windows]
+  pull_request:
+    branches: [windows]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Check out source and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install Qt 5.15.2 for MSVC x64
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          arch: win64_msvc2019_64
+          cache: true
+
+      - name: Build and package Release
+        shell: powershell
+        run: |
+          & ./meta/windows/Build.ps1 -QtDir $env:QT_ROOT_DIR
+          if ($LASTEXITCODE -ne 0) { throw 'Windows build failed.' }
+          & ./meta/windows/Package.ps1 -QtDir $env:QT_ROOT_DIR
+          if ($LASTEXITCODE -ne 0) { throw 'Windows packaging failed.' }
+          & ./meta/windows/Package-Source.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Source packaging failed.' }
+
+      - name: Upload binary and complete corresponding source
+        uses: actions/upload-artifact@v4
+        with:
+          name: JamesDSP-windows-release
+          path: |
+            ../dist/JamesDSP-windows-x64.zip
+            ../dist/JamesDSP-windows-source.zip
+          if-no-files-found: error
+          compression-level: 0

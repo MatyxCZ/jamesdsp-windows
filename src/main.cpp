@@ -1,7 +1,9 @@
 #include "MainWindow.h"
 #include "config/DspConfig.h"
 #include "utils/CliRemoteController.h"
+#ifndef _WIN32
 #include "utils/FindBinary.h"
+#endif
 #include "utils/SingleInstanceMonitor.h"
 #include "utils/VersionMacros.h"
 
@@ -15,8 +17,35 @@
 #include <QSessionManager>
 #include <QTranslator>
 
+#include <string>
+
+#ifndef _WIN32
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <unistd.h>
+#else
+#include <windows.h>
+#include <direct.h>
+#include <process.h>
+#endif
+
+// Platform-independent temp directory for JamesDSP crash files
+static std::string jdspTempDir()
+{
+#ifdef _WIN32
+    char tempDir[MAX_PATH];
+    DWORD len = GetTempPathA(MAX_PATH, tempDir);
+    if (len == 0 || len > MAX_PATH)
+        return ".";
+    std::string dir(tempDir, len);
+    if (!dir.empty() && dir.back() != '\\' && dir.back() != '/')
+        dir += '\\';
+    dir += "jamesdsp";
+    return dir;
+#else
+    return "/tmp/jamesdsp";
+#endif
+}
 
 static QTranslator* qtTranslator = nullptr;
 static QTranslator* translator = nullptr;
@@ -30,14 +59,28 @@ static bool SPIN_ON_CRASH = false;
 void onExceptionRaised(int fd)
 {
     Q_UNUSED(fd)
-	safe_printf(STDERR_FILENO, "Done! Crash report saved to /tmp/jamesdsp/crash.dmp.\n");
+#ifdef _WIN32
+    safe_printf(STDERR_FILENO, "Done! Crash report saved to %s\\crash.dmp.\n", jdspTempDir().c_str());
+#else
+    safe_printf(STDERR_FILENO, "Done! Crash report saved to /tmp/jamesdsp/crash.dmp.\n");
+#endif
 
     if(SPIN_ON_CRASH)
     {
-        safe_printf(STDERR_FILENO, "\nSpinning. Please run 'gdb jamesdsp %u' to continue debugging, Ctrl-C to quit, or Ctrl-\\ to dump core\n", getpid());
+        safe_printf(STDERR_FILENO, "\nSpinning. Please run 'gdb jamesdsp %u' to continue debugging, Ctrl-C to quit, or Ctrl-\\ to dump core\n",
+#ifdef _WIN32
+        _getpid()
+#else
+        getpid()
+#endif
+        );
         while(true)
         {
+#ifdef _WIN32
+            Sleep(1000);
+#else
             sleep(1);
+#endif
         }
     }
     else
@@ -68,7 +111,11 @@ bool initCrashHandler(const char* exePath) {
     }
 
     EXECUTION_FILENAME = exePath;
+#ifdef _WIN32
+    airbag_init_fd(safe_open_wo_fd((jdspTempDir() + "\\crash.dmp").c_str()), onExceptionRaised, EXECUTION_FILENAME);
+#else
     airbag_init_fd(safe_open_wo_fd("/tmp/jamesdsp/crash.dmp"), onExceptionRaised, EXECUTION_FILENAME);
+#endif
     return lastSessionCrashed;
 #else
     return false;
@@ -139,12 +186,20 @@ using namespace std;
 int main(int   argc,
          char *argv[])
 {
-    // Used for some crash handler magic & auto-start setup
-	findyourself_init(argv[0]);
-	char exepath[PATH_MAX];
-	find_yourself(exepath, sizeof(exepath));
+    // The legacy POSIX binary finder has no Windows implementation.
+#ifndef _WIN32
+    findyourself_init(argv[0]);
+    char exepath[PATH_MAX] = {};
+    find_yourself(exepath, sizeof(exepath));
+#else
+    const char* exepath = argv[0];
+#endif
     // Ensure temp directory exists
+#ifdef _WIN32
+    _mkdir(jdspTempDir().c_str());
+#else
     mkdir("/tmp/jamesdsp/", S_IRWXU);
+#endif
     // Prepare crash handler if enabled
     bool lastSessionCrashed = initCrashHandler(exepath);
 
@@ -296,8 +351,9 @@ int main(int   argc,
         }
     #endif
 
-        AppConfig::instance().set(AppConfig::ExecutablePath, QString::fromLocal8Bit(exepath));
-        initGui(parser.isSet(tray), parser.isSet(watch));
+        AppConfig::instance().set(AppConfig::ExecutablePath, QCoreApplication::applicationFilePath());
+        if (!initGui(parser.isSet(tray), parser.isSet(watch)))
+            return 0;
 
         return QApplication::exec();
     }

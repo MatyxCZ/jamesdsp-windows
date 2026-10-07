@@ -1,0 +1,72 @@
+JamesDSP for Windows
+===================
+
+This Windows port is based on JDSP4Linux by Tim Schneeberger and contributors
+and the JamesDSP audio processing library by James Fung and contributors.
+Upstream project: https://github.com/Audio4Linux/JDSP4Linux
+Windows fork and corresponding source: https://github.com/MatyxCZ/jamesdsp-windows
+
+JamesDSP is free software distributed under the GNU General Public License.
+The root LICENSE contains GPL version 3. Original bundled component licenses
+and verbatim copyright/license comments are preserved under licenses/.
+Those notices apply to their respective components; this notice does not
+change or relicense any upstream component.
+
+Bundled components include Qt, libjamesdsp, Async++, QtPromise, QCustomPlot,
+QtCSV, Windows Animation Framework, FlatTabWidget, LiquidEqualizerWidget,
+GraphicEQWidget, QCodeEditor, Qt Advanced Docking System, and DSP dependencies
+such as NS-EEL, dr_libs, libsamplerate, and High Precision Arithmetic (HPA).
+The source-derived notices retain the authors and license terms, including
+single-header libraries whose notices are not in separate LICENSE files.
+
+Qt 5.15.2 is dynamically linked. Original v5.15.2 Qt base/SVG/imageformats
+attributions, third-party copyright notices and license texts are included
+under licenses/Qt-5.15.2-notices/, with acquisition provenance. Standard Qt
+license texts from the installed distribution are also preserved. You may
+replace the dynamically loaded Qt DLLs with compatible builds; this package
+does not impose signing or technical restrictions on replacement. Qt source:
+https://download.qt.io/archive/qt/5.15/5.15.2/single/
+https://doc.qt.io/qt-5/licensing.html
+https://doc.qt.io/qt-5/licenses-used-in-qt.html
+
+Microsoft Visual C++ runtime files are copied from the official redistributable
+directory and remain Microsoft components, redistributed under these terms:
+https://learn.microsoft.com/visualstudio/releases/2022/redistribution
+
+Distributors must provide the complete corresponding source for the exact
+binary they distribute and satisfy all applicable third-party license terms.
+A source URL alone is not a substitute for publishing the matching modified
+source. Keep source and binaries available together at each public release.
+
+The DSP README grants GPL without specifying a version. Its bundled GPLv2
+text permits selection of a GPL version where the program specifies none;
+the combined application uses GPLv3. Original component notices are retained.
+
+This is an experimental Windows proof of concept, not a stable audio driver.
+With VB-Cable installed separately, set Windows default playback to CABLE
+Input and select DIFFERENT physical headphones/speakers in Settings > Devices.
+Relink through the three-dot menu after routing/rate changes. Windows captures
+the entire playback mix; per-app exclusion is unsupported. Matching endpoint
+rates helped user testing (192000 Hz), not a universal fix. Preset loading,
+sustained DSP overload and independent device clocks can still cause glitches.
+
+Portable use and optional Windows integration
+--------------------------------------------
+Extract the entire ZIP to a permanent folder. Launch jamesdsp.exe directly,
+or run Install.cmd to register this copy in your per-user Start Menu for
+Windows Search. Registration does not change your startup-at-sign-in choice.
+Windows Search may take a moment to refresh its index. No administrator
+rights are required, and no source/project directory is moved.
+
+To explicitly start in the tray at sign-in, run in PowerShell:
+  .\Register-Application.ps1 -InstallDirectory . -StartWithWindows
+
+To remove only this copy's Start Menu/startup integration, run:
+  .\Unregister-Application.ps1 -InstallDirectory .
+
+If PowerShell execution policy blocks these scripts, invoke powershell.exe
+with -NoProfile -ExecutionPolicy Bypass -File and the same script/arguments,
+as Install.cmd does. This changes policy only for that PowerShell process.
+Unregistration never deletes application files or personal settings. If you
+move the extracted folder, unregister its old location before registering
+its new location. Integration pointing to a different copy is not removed.

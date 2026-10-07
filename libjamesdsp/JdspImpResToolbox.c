@@ -260,7 +260,10 @@ void circshift(float *x, int n, int k)
 #define NUMPTS 15
 #define NUMPTS_DRS (7)
 ierper pch1, pch2, pch3;
-__attribute__((constructor)) static void initialize(void)
+#ifndef _MSC_VER
+void initialize(void) __attribute__((constructor));
+#endif
+void initialize(void)
 {
     if (decompressedCoefficients)
         free(decompressedCoefficients);
@@ -270,14 +273,17 @@ __attribute__((constructor)) static void initialize(void)
     initIerper(&pch2, NUMPTS + 2);
     initIerper(&pch3, NUMPTS_DRS + 2);
 }
-__attribute__((destructor)) static void destruction(void)
+#ifndef _MSC_VER
+void destruction(void) __attribute__((destructor));
+#endif
+void destruction(void)
 {
     free(decompressedCoefficients);
     decompressedCoefficients = 0;
     freeIerper(&pch1);
     freeIerper(&pch2);
     freeIerper(&pch3);
- }
+}
 static void JamesDSPOfflineResampling(float const *in, float *out, size_t lenIn, size_t lenOut, int channels, double src_ratio, int resampleQuality)
 {
     if (lenOut == lenIn && lenIn == 1)

@@ -1,31 +1,31 @@
 <h1 align="center">
-  <img alt="Icon" width="75" src="https://github.com/Audio4Linux/JDSP4Linux/blob/master/resources/icons/icon.png?raw=true">
+  <img alt="Icon" width="75" src="resources/icons/icon.png">
   <br>
-  JamesDSP for Linux
+  JamesDSP for Windows
   <br>
 </h1>
-<h4 align="center">Open-source sound effects for PipeWire and PulseAudio</h4>
+<h4 align="center">Experimental system-wide audio effects through WASAPI</h4>
 <p align="center">
-  <a href="https://github.com/Audio4Linux/JDSP4Linux/releases">
-  	<img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/Audio4Linux/JDSP4Linux">
+  <a href="https://github.com/MatyxCZ/jamesdsp-windows/releases">
+    <img alt="Windows prerelease" src="https://img.shields.io/github/v/release/MatyxCZ/jamesdsp-windows?include_prereleases">
   </a>
-  <a href="https://github.com/Audio4Linux/JDSP4Linux/blob/master/LICENSE">
-      <img alt="License" src="https://img.shields.io/github/license/Audio4Linux/JDSP4Linux">
+  <a href="LICENSE">
+    <img alt="License" src="https://img.shields.io/github/license/MatyxCZ/jamesdsp-windows">
   </a>
-  <a href="https://github.com/Audio4Linux/JDSP4Linux/">
-    <img alt="Windows build" src="https://img.shields.io/github/repo-size/Audio4Linux/JDSP4Linux">
+  <a href="https://github.com/MatyxCZ/jamesdsp-windows/actions/workflows/windows.yml">
+    <img alt="Windows build" src="https://github.com/MatyxCZ/jamesdsp-windows/actions/workflows/windows.yml/badge.svg?branch=windows">
   </a>
 </p>
 <p align="center">
   <a href="#features">Features</a> •
-  <a href="#installation">Installation</a> •
+  <a href="#windows-installation">Windows installation</a> •
   <a href="#scripting--ipc-apis">Scripting/API</a> •
   <a href="#contributors">Contributors</a> •
   <a href="#license">License</a> 
 </p>
 
 <p align="center">
-   <img alt="Screenshot" width="702" src="https://github.com/Audio4Linux/JDSP4Linux/blob/master/meta/screenshot.png?raw=true">
+   <img alt="Windows application screenshot" width="700" src="meta/windows/screenshot.png">
 </p>
 
 <p align="center">
@@ -78,6 +78,125 @@ ____________
     * Console output support
     * Detailed error messages with inline code highlighting
 
+
+## Windows WASAPI port
+
+**Proof of concept, not a stable audio driver.** Tested on Windows 11 x64 with
+VB-Cable and 192000 Hz playback. The upstream Linux implementation and credits
+are retained; report Windows-port issues in this fork, not the upstream tracker.
+
+### Windows installation
+
+1. Download `JamesDSP-windows-x64.zip` from the
+   [Windows releases](https://github.com/MatyxCZ/jamesdsp-windows/releases).
+2. Extract the **entire ZIP** to a permanent folder, not Temp. Qt and the
+   Microsoft C++ runtime DLLs are included; keep the plugins and DLLs together.
+3. Run `Install.cmd` to add **JamesDSP** to your per-user Start Menu and Windows
+   Search. No administrator rights are needed. Registration does not change
+   your startup preference or move your files.
+4. Launch JamesDSP from Windows Search. Opening it again brings the existing
+   tray instance to the foreground instead of starting another audio pipeline.
+5. For automatic startup, enable **Settings → Tray icon → Start in tray when
+   signing in to Windows**. This is per-user sign-in startup, not a boot service.
+   Windows Startup Apps/Task Manager can independently disable startup.
+
+The package is unsigned; Windows may show a publisher/SmartScreen warning.
+Windows 10/11 x64 is the target; this release was smoke-tested on Windows 11.
+VB-Cable is a separate third-party driver, not bundled with JamesDSP:
+[official VB-Audio download](https://vb-audio.com/Cable/).
+
+To explicitly enable startup while registering an extracted package:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Register-Application.ps1 -StartWithWindows
+```
+
+To remove this copy's Start Menu/startup integration, close JamesDSP and run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Unregister-Application.ps1
+```
+
+Personal settings and application files are not deleted. If you move the folder,
+unregister the old location before registering the new one; cleanup never removes
+integration belonging to a different copy.
+
+### Windows audio routing
+
+This experimental port captures the Windows default playback endpoint through
+WASAPI loopback and sends processed audio to a **different** output endpoint.
+With VB-Cable installed:
+
+1. Set Windows default playback to **CABLE Input (VB-Audio Virtual Cable)**.
+2. In JamesDSP **Settings → Devices**, manually select physical headphones or
+   speakers as the output. Do not select the cable as JamesDSP's output.
+3. After routing or device-format changes, use **Relink audio pipeline** in the
+   main window's three-dot menu. The Devices page includes routing help and a
+   shortcut to Windows sound settings.
+
+Matching cable and headphone sample rates has helped in user testing, including
+192000 Hz when supported by both devices. This is a workaround, not an established
+diagnosis; the render stream already requests WASAPI sample-rate conversion.
+
+The Windows worker retains processed capture packets and submits partial render
+chunks when output space is limited, rather than discarding entire packets.
+The service reblocks input into fixed 128-frame DSP quanta, adding 128 frames of
+delay (0.667 ms at 192000 Hz). This prevents packet-size jitter from rebuilding
+convolvers repeatedly. Crossfeed refresh also clears freed state when switching
+convolution implementations.
+The worker enables SSE flush-to-zero/denormals-are-zero on the audio thread to
+avoid IIR-tail slowdowns during silence, restoring its previous policy on exit.
+These changes do not guarantee glitch-free playback under sustained DSP overload
+or independently clocked endpoints; loading a preset can still stall processing.
+
+Windows captures the **whole default playback mix**. The Apps list is informational;
+per-app blocklisting/allowlisting and automatic output selection are not supported.
+Choose a physical output explicitly. Invalid/same-endpoint routing is rejected
+and reported in the GUI rather than enabling a feedback loop.
+
+Known limits: independently clocked endpoints can drift; sustained DSP overload,
+preset loading, disconnects, or sample-rate changes can interrupt playback.
+Relink after routing changes. Matching rates helped the original user, but neither
+192000 Hz nor these fixes guarantee glitch-free playback on every device.
+The original severe “Church” stuttering report did not identify an exact preset
+file; measured DDC denormals and convolution packet-jitter stalls were fixed,
+not a claim that every similarly named preset was diagnosed.
+
+### Build and package Windows sources
+
+Install Qt **5.15.2 msvc2019_64**, Visual Studio 2022/Build Tools with **Desktop
+development with C++**, and Git. Use a recursive checkout:
+
+```powershell
+git clone --recurse-submodules https://github.com/MatyxCZ/jamesdsp-windows.git
+cd jamesdsp-windows
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File meta/windows/Build.ps1 -QtDir "C:\Qt\5.15.2\msvc2019_64"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File meta/windows/Package.ps1 -QtDir "C:\Qt\5.15.2\msvc2019_64"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File meta/windows/Package-Source.ps1
+```
+
+Scripts discover MSVC using `vswhere`; `-BuildDirectory` and `-OutputDirectory`
+can override the default sibling `build` and `dist` folders. `QTDIR` or
+`QT_ROOT_DIR` can supply the Qt path. Packaging starts in an empty staging folder,
+not an existing build/runtime folder, and ships runtime files and license notices
+only. The `windows` branch has a Windows build/artifact workflow.
+
+Each release also provides `JamesDSP-windows-source.zip`: the committed application
+plus **all recursively pinned submodule sources** and `SOURCE_REVISION.txt`.
+GitHub's automatically generated source archives do not include submodules.
+The complete source ZIP can be built without fetching those dependencies.
+
+The patched LiquidEqualizerWidget is vendored from
+[ThePBone/LiquidEqualizerWidget](https://github.com/ThePBone/LiquidEqualizerWidget)
+commit `4cf30acf164026915e08ee0067ffe4753be3ace6`, retaining its GPL notices.
+This includes the MSVC lifecycle/portability fixes that an unchanged gitlink
+would otherwise omit. Other submodules retain their public upstream pins.
+
+### Linux upstream
+
+The following Linux instructions describe the inherited upstream backend.
+Its build contracts are retained; Linux execution was not verified on this
+Windows workstation.
 
 ## PipeWire vs PulseAudio
 
@@ -249,7 +368,7 @@ sudo wget -O /usr/share/pixmaps/jamesdsp.png https://raw.githubusercontent.com/A
 ```
 ## Scripting & IPC APIs
 
-Since version 2.5.0, this app supports IPC via D-Bus and is also configurable via a CLI.
+Linux uses D-Bus IPC; Windows uses local named pipes. Both expose remote CLI commands.
 
 ### Remote control via CLI
 You can list all supported commands using `jamesdsp --help`. 

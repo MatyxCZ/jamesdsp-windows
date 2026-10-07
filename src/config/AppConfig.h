@@ -23,7 +23,6 @@
 #include <QMetaEnum>
 #include <optional>
 
-using namespace std;
 
 class AppConfig :
 	public QObject

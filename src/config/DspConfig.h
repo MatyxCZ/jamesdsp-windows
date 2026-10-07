@@ -26,7 +26,6 @@
 #include <QFileSystemWatcher>
 #include <QDebug>
 
-using namespace std;
 
 class DspConfig :
 	public QObject

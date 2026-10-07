@@ -622,6 +622,38 @@
           </widget>
          </item>
          <item>
+          <widget class="QGroupBox" name="windowsRoutingBox">
+           <property name="title">
+            <string>Windows routing setup (VB-Cable)</string>
+           </property>
+           <layout class="QVBoxLayout" name="windowsRoutingLayout">
+            <item>
+             <widget class="QLabel" name="windowsRoutingHelp">
+              <property name="text">
+               <string>Set Windows default playback/output to CABLE Input (VB-Audio Virtual Cable), so apps send audio into the cable.
+
+Here, select “Manually select device” and choose your physical headphones or speakers as the JamesDSP output. Windows playback and JamesDSP output must be different endpoints; do not select CABLE Input here.
+
+If playback stutters, try matching the cable and headphones sample rates in Windows sound device properties (Advanced / Default format), then relink. Matching rates (for example, 192000 Hz when both devices support it) has helped in testing, but is a workaround, not proof of the root cause.
+
+To relink after routing or rate changes, return to the main window and choose “Relink audio pipeline” in the three-dot menu.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="windowsSoundSettings">
+              <property name="text">
+               <string>Open Windows sound settings</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <widget class="QGroupBox" name="blocklistBox">
            <property name="title">
             <string>Blocklisted apps</string>
