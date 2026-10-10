@@ -85,6 +85,12 @@ ____________
 VB-Cable and 192000 Hz playback. The upstream Linux implementation and credits
 are retained; report Windows-port issues in this fork, not the upstream tracker.
 
+This repository forks the **official [Audio4Linux/JDSP4Linux](https://github.com/Audio4Linux/JDSP4Linux)**
+directly. The Windows port incorporates upstream commit
+[`3ea7d733c090409c00887db3bb3aaf3af79ea692`](https://github.com/Audio4Linux/JDSP4Linux/commit/3ea7d733c090409c00887db3bb3aaf3af79ea692),
+including its updated DSP engine, route-aware preset rules, and `--relink` CLI.
+Windows still builds with Qt 5.15.2 using upstream's Qt 5 compatibility support.
+
 ### Windows installation
 
 1. Download `JamesDSP-windows-x64.zip` from the

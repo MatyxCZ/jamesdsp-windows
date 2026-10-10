@@ -22,15 +22,19 @@
 static QTextStream out(stdout);
 static QTextStream err(stderr);
 #ifdef _WIN32
-// Enable ANSI escape sequence processing on the Windows console so the colour
-// codes emitted above render correctly. When colouredOutput is disabled, plain
-// text is emitted instead, which works on every platform.
-static void enableWindowsConsoleAnsi()
+// Keep native console and redirected CLI output in UTF-8, including preset names.
+// ANSI processing is enabled even when this invocation emits only plain text.
+static void initializeWindowsConsole()
 {
     static bool enabled = false;
     if(enabled)
         return;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    out.setCodec("UTF-8");
+    err.setCodec("UTF-8");
+#endif
+    SetConsoleOutputCP(CP_UTF8);
     HANDLE handles[] = { GetStdHandle(STD_OUTPUT_HANDLE), GetStdHandle(STD_ERROR_HANDLE) };
     for(HANDLE h : handles)
     {
@@ -151,9 +155,6 @@ void Log::write(const QString &log,
 
     if(coloredOutput)
     {
-#ifdef _WIN32
-        enableWindowsConsoleAnsi();
-#endif
         formattedLog = QString("%1%2%3").arg(color).arg(formattedLog).arg(C_RESET);
     }
 
@@ -167,6 +168,7 @@ void Log::write(const QString& msg, bool force, bool useStdErr, LoggingMode mode
 
     mutex.lock();
 #ifdef _WIN32
+    initializeWindowsConsole();
     ensureLogDirectory();
 #endif
 
@@ -183,7 +185,7 @@ void Log::write(const QString& msg, bool force, bool useStdErr, LoggingMode mode
 
     if ((mode == LM_ALL || mode == LM_STDOUT) && (!silent || force))
     {
-        (useStdErr ? err : out) << msg.toUtf8().constData() << Qt::endl;
+        (useStdErr ? err : out) << msg << Qt::endl;
         (useStdErr ? err : out).flush();
     }
 
