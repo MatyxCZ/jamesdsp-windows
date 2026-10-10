@@ -4,13 +4,11 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QVariant>
-#include <QThread>
+#include <QMap>
 #include <QLocalServer>
 #include <QLocalSocket>
 
-class IAudioService;
-class DspConfig;
+class IpcHandler;
 
 /*
  * On Windows, we use QLocalServer/QLocalSocket (named pipes) instead of D-Bus
@@ -24,13 +22,11 @@ class PipeIPCServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit PipeIPCServer(IAudioService* service, QObject* parent = nullptr);
+    explicit PipeIPCServer(IpcHandler* handler, QObject* parent = nullptr);
     ~PipeIPCServer();
 
     bool start();
     void stop();
-
-    IAudioService* service() const { return _service; }
 
 signals:
     void raiseWindow();
@@ -41,11 +37,10 @@ private slots:
     void onDisconnected();
 
 private:
-    void handleCommand(QLocalSocket* socket, const QString& command);
-    QString executeCommand(const QString& cmd, const QStringList& args);
+    QString executeCommand(const QString& command, const QStringList& args);
 
     QLocalServer* _server = nullptr;
-    IAudioService* _service = nullptr;
+    IpcHandler* _handler = nullptr;
     QMap<QLocalSocket*, QByteArray> _buffers;
 };
 
@@ -60,7 +55,7 @@ public:
     void disconnectFromServer();
     bool isConnected() const { return _socket && _socket->state() == QLocalSocket::ConnectedState; }
 
-    QString sendCommand(const QString& command);
+    QString sendCommand(const QString& command, const QStringList& args = {});
 
 signals:
     void connected();

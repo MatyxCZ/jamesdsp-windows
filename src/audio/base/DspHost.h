@@ -12,7 +12,7 @@
 class BenchmarkWorker;
 class DspConfig;
 class QThread;
-class QVariant;
+#include <QtCore/qcontainerfwd.h>
 
 class DspHost
 {
@@ -63,6 +63,7 @@ private:
     void updateConvolver(DspConfig *config);
     void updateGraphicEq(DspConfig *config);
     void updateCrossfeed(DspConfig *config);
+    void updateStereoWide(DspConfig *config);
 
 };
 

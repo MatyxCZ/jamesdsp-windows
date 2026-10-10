@@ -7,6 +7,7 @@
 #include "DspStatus.h"
 #include "EventArgs.h"
 #include "IAppManager.h"
+#include "data/PresetManager.h"
 
 #include <QObject>
 #include <memory>
@@ -17,6 +18,10 @@ class IAudioService : public QObject
 {
     Q_OBJECT
 public:
+    IAudioService() {
+        connect(this, &IAudioService::outputDeviceChanged, &PresetManager::instance(), &PresetManager::onOutputDeviceChanged);
+    }
+
     virtual ~IAudioService() {}
 
 public slots:
@@ -28,6 +33,7 @@ public slots:
     virtual DspHost* host() = 0;
 
     virtual std::vector<IOutputDevice> sinkDevices() = 0;
+    virtual std::vector<IOutputDevice> outputDevices() = 0;
     virtual DspStatus status() = 0;
 
     void reloadLiveprog();
@@ -43,9 +49,8 @@ signals:
     void eelVariablesEnumerated(const std::vector<EelVariable>& vars);
     void convolverInfoChanged(const ConvolverInfoEventArgs& args);
     void logOutputReceived(const QString& output);
-    void outputDeviceChanged(const QString& deviceName, const QString& deviceId);
+    void outputDeviceChanged(const QString& deviceName, const QString& deviceId, const QString& outputRouteName);
     void benchmarkDone();
-
 };
 
 inline void IAudioService::reloadLiveprog()

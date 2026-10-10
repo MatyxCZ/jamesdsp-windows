@@ -10,17 +10,17 @@
 
 #include <QDebug>
 
-PipewireAudioService::PipewireAudioService()
+PipewireAudioService::PipewireAudioService() : IAudioService()
 {
     Glib::init();
 
-    mgr = std::make_unique<PwPipelineManager>();
+    mgr = std::make_unique<PwPipelineManager>(AppConfig::instance().get<bool>(AppConfig::AudioVirtualSinkForceMaxValue));
     appMgr = std::make_unique<PwAppManager>(mgr.get());
     plugin = new PwJamesDspPlugin(mgr.get(), this);
     effects = std::make_unique<FilterContainer>(mgr.get(), plugin, &AppConfig::instance());
 
-    mgr.get()->new_default_sink_name.connect([=](const std::string& name) {
-        util::debug("new default output device: " + name);
+    mgr.get()->new_default_sink_name.connect([this](const std::string& name) {
+        util::debug("new default output sink: " + name);
 
         if (AppConfig::instance().get<bool>(AppConfig::AudioOutputUseDefault)) {
             /*
@@ -31,6 +31,18 @@ PipewireAudioService::PipewireAudioService()
             AppConfig::instance().set(AppConfig::AudioOutputDevice, "");
             AppConfig::instance().set(AppConfig::AudioOutputDevice, QString::fromStdString(name));
         }
+
+        for (const auto& device : mgr.get()->list_devices)
+        {
+            if (device.media_class == tags::pipewire::media_class::device) {
+                if (name.starts_with(device.name) || util::str_contains(name, device.bus_path) || util::str_contains(name, device.bus_id)) {
+
+                    util::debug("output device has changed to: "s + device.name + " via route "s + device.output_route_name);
+                    emit outputDeviceChanged(QString::fromStdString(device.description), QString::fromStdString(device.name), QString::fromStdString(device.output_route_name));
+                    break;
+                }
+            }
+        }
     });
 
     mgr.get()->device_output_route_changed.connect([this](DeviceInfo device) {
@@ -38,9 +50,7 @@ PipewireAudioService::PipewireAudioService()
         {
             return;
         }
-
         util::debug("device "s + device.name + " has changed its output route to: "s + device.output_route_name);
-
 
         NodeInfo target_node;
         for (const auto& [serial, node] : mgr.get()->node_map)
@@ -56,7 +66,7 @@ PipewireAudioService::PipewireAudioService()
 
         if (target_node.serial != SPA_ID_INVALID)
         {
-            emit outputDeviceChanged(QString::fromStdString(target_node.description), QString::fromStdString(device.name));
+            emit outputDeviceChanged(QString::fromStdString(target_node.description), QString::fromStdString(device.name), QString::fromStdString(device.output_route_name));
         }
         else
         {
@@ -103,7 +113,7 @@ void PipewireAudioService::onAppConfigUpdated(const AppConfig::Key &key, const Q
             {
                 if (device.id == device_id)
                 {
-                    emit outputDeviceChanged(QString::fromStdString(device.description), name);
+                    emit outputDeviceChanged(QString::fromStdString(device.description), name, QString::fromStdString(device.output_route_name));
                     break;
                 }
             }
@@ -164,6 +174,16 @@ std::vector<IOutputDevice> PipewireAudioService::sinkDevices()
 
             devices.push_back(PwDevice(node));
         }
+    }
+    return devices;
+}
+
+std::vector<IOutputDevice> PipewireAudioService::outputDevices()
+{
+    std::vector<IOutputDevice> devices;
+    for(const auto &device : mgr.get()->list_devices)
+    {
+        devices.push_back(PwDevice(device));
     }
     return devices;
 }

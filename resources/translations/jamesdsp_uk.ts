@@ -312,7 +312,7 @@ Do you want to re-install the latest database update anyway?</source>
   <context>
     <name>AutostartManager</name>
     <message>
-      <location filename="../../src/utils/AutoStartManager.cpp" line="79"/>
+      <location filename="../../src/utils/AutoStartManager.cpp" line="78"/>
       <source>Manage auto-start permission for JamesDSP</source>
       <translation>Керування дозволом для автопочатку JamesDSP</translation>
     </message>
@@ -463,7 +463,7 @@ Do you want to re-install the latest database update anyway?</source>
     </message>
     <message>
       <location filename="../../src/subprojects/EELEditor/src/eeleditor.ui" line="216"/>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="460"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="459"/>
       <source>Go to line...</source>
       <translation>Перейти до рядка...</translation>
     </message>
@@ -479,7 +479,7 @@ Do you want to re-install the latest database update anyway?</source>
     </message>
     <message>
       <location filename="../../src/subprojects/EELEditor/src/eeleditor.ui" line="231"/>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="471"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="470"/>
       <source>Jump to function...</source>
       <translation>Перейти до функції...</translation>
     </message>
@@ -565,82 +565,82 @@ Do you want to re-install the latest database update anyway?</source>
       <translation>F6</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="88"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="87"/>
       <source>Loaded projects</source>
       <translation>Завантажені проекти</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="98"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="97"/>
       <source>Code outline</source>
       <translation>Контур коду</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="108"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="107"/>
       <source>Variable view</source>
       <translation>Змінний вигляд</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="122"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="121"/>
       <source>Console output</source>
       <translation>Вивід з консолі</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="212"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="211"/>
       <source>&apos;%1&apos; started compiling at %2</source>
       <translation>&apos;%1&apos; почали компілюватися о %2</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="295"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="294"/>
       <source>&lt;br&gt;Compilation stopped at %2</source>
       <translation>&lt;br&gt;Компіляція зупинилася о %2</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="299"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="298"/>
       <source>Script initialization took %1ms</source>
       <translation>Ініціалізація сценарію забрала %1мс</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="386"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="385"/>
       <source>Error</source>
       <translation>Помилка</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="386"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="385"/>
       <source>Cannot write file</source>
       <translation>Не вдалося записати до файлу</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="414"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="413"/>
       <source>Open EEL script</source>
       <translation>Відкрити EEL-сценарій</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="414"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="413"/>
       <source>EEL2 Script (*.eel)</source>
       <translation>EEL2 сценарій (*.eel)</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="432"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="431"/>
       <source>Save as</source>
       <translation>Зберегти як</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="449"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="448"/>
       <source>Cannot execute</source>
       <translation>Неможливо виконати</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="449"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="448"/>
       <source>No script file opened. Please open one first and try again.</source>
       <translation>Не відкрито жодного файлу сценарію. Відкрийте якийсь спочатку і повторіть спробу.</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="461"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="460"/>
       <source>Enter line number:</source>
       <translation>Введіть номер рядка:</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="472"/>
+      <location filename="../../src/subprojects/EELEditor/src/eeleditor.cpp" line="471"/>
       <source>Enter function name:</source>
       <translation>Введіть назву функції:</translation>
     </message>
@@ -757,12 +757,12 @@ Do you want to re-install the latest database update anyway?</source>
       <translation>Замінити &amp;все</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/widgets/findreplaceform.cpp" line="147"/>
+      <location filename="../../src/subprojects/EELEditor/src/widgets/findreplaceform.cpp" line="148"/>
       <source>no match found</source>
       <translation>збігів не знайдено</translation>
     </message>
     <message>
-      <location filename="../../src/subprojects/EELEditor/src/widgets/findreplaceform.cpp" line="170"/>
+      <location filename="../../src/subprojects/EELEditor/src/widgets/findreplaceform.cpp" line="171"/>
       <source>Replaced %1 occurrence(s)</source>
       <translation>Замінено %1 збіг(и)</translation>
     </message>
@@ -914,7 +914,7 @@ However, before you can begin playing around with JamesDSP for Linux, we&apos;ll
       <location filename="../../src/subprojects/GraphicEQWidget/GraphicEQWidget/GraphicEQFilterGUI.cpp" line="412"/>
       <location filename="../../src/subprojects/GraphicEQWidget/GraphicEQWidget/GraphicEQFilterGUI.cpp" line="506"/>
       <source>CSV frequency response (*.csv)</source>
-      <translation>CSV амплітудної-частотної характеристики (*.csv)</translation>
+      <translation>CSV амплітудно-частотної характеристики (*.csv)</translation>
     </message>
     <message>
       <location filename="../../src/subprojects/GraphicEQWidget/GraphicEQWidget/GraphicEQFilterGUI.cpp" line="413"/>
@@ -1007,7 +1007,7 @@ Please select another one</source>
       <translation>Редагувати скрипт</translation>
     </message>
     <message>
-      <location filename="../../src/interface/LiveprogSelectionWidget.cpp" line="240"/>
+      <location filename="../../src/interface/LiveprogSelectionWidget.cpp" line="241"/>
       <source>No customizable parameters</source>
       <translation>Немає змінних параметрів</translation>
     </message>
@@ -1022,7 +1022,7 @@ Please select another one</source>
     <message>
       <location filename="../../src/MainWindow.ui" line="106"/>
       <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Dynamic bass boost&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Frequency-detecting bass-boost. Automatically sets its own parameters, such as gain, bandwidth, and cut-off frequency by analysing the incoming audio stream&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;Max gain:&lt;/span&gt; adjusts the amount of the dynamic bass boost effects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Динамічне підсилення басу&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Частотно-определяемое усиление басов. Підсилення низьких частот із визначенням частоти. Автоматично встановлює власні параметри, такі як посилення, пропускна здатність і частота зрізу, аналізуючи вхідний аудіопотік&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;Максимальне підсилення:&lt;/span&gt; регулює величину ефекту динамічного підсилення басу.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Динамічне підсилення басу&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Частотно-залежне підсилення басу. Підсилення низьких частот із визначенням частоти. Аналізуючи вхідний аудіопотік, автоматично встановлює власні параметри: підсилення, ширину полоси і частоту зрізу&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;Максимальне підсилення:&lt;/span&gt; регулює величину ефекту динамічного підсилення басу.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
       <location filename="../../src/MainWindow.ui" line="109"/>
@@ -1037,7 +1037,7 @@ Please select another one</source>
     <message>
       <location filename="../../src/MainWindow.ui" line="156"/>
       <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Analog modelling&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Oversampled analog modelling is an aliasing-free, even harmonic generator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Аналогове моделювання&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Надсемплінг аналогового моделювання - це генератор рівних гармонік без згладжування.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Аналогове моделювання&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Завдяки надлишковій дискретизації, аналогове моделювання генерує чисті парні гармоніки без артефактів накладання спектрів.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
       <location filename="../../src/MainWindow.ui" line="159"/>
@@ -1047,7 +1047,7 @@ Please select another one</source>
     <message>
       <location filename="../../src/MainWindow.ui" line="171"/>
       <source>Preamp (Harmonics)</source>
-      <translation>Підсилювач (Гармоніки)</translation>
+      <translation>Передпідсилювач (Гармоніки)</translation>
     </message>
     <message>
       <location filename="../../src/MainWindow.ui" line="194"/>
@@ -1133,7 +1133,7 @@ Please select another one</source>
     <message>
       <location filename="../../src/MainWindow.ui" line="621"/>
       <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Soundstage widthness&lt;/span&gt;&lt;/p&gt;&lt;p&gt;An algorithm that detects stereo phase relation in a several spectral regions, and enhances the stereo soundstage without affecting vocal integrity.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Ширина звукової сцени&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Алгоритм, який виявляє стереофазове співвідношення в кількох спектральних областях і покращує стереозвук, не впливаючи на цілісність вокалу.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Ширина звукової сцени&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Алгоритм, який виявляє міжканальну фазову різницю в кількох спектральних областях і покращує стереозвук, не впливаючи на цілісність вокалу.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
       <location filename="../../src/MainWindow.ui" line="624"/>
@@ -1294,17 +1294,17 @@ Please select another one</source>
     <message>
       <location filename="../../src/MainWindow.ui" line="412"/>
       <source>Multiresolution (Continuous wavelet, incomplete dual frame)</source>
-      <translation type="unfinished"/>
+      <translation>Мультироздільність (безперервний вейвлет, неповний подвійний фрейм)</translation>
     </message>
     <message>
       <location filename="../../src/MainWindow.ui" line="417"/>
       <source>Pseudo multiresolution (Undersampling frame)</source>
-      <translation type="unfinished"/>
+      <translation>Псевдомультироздільність (зниження частоти дискретизації фрейму)</translation>
     </message>
     <message>
       <location filename="../../src/MainWindow.ui" line="422"/>
       <source>Pseudo multiresolution (Time domain, zero latency)</source>
-      <translation type="unfinished"/>
+      <translation>Псевдомультироздільність (область часу, нульова затримка)</translation>
     </message>
     <message>
       <location filename="../../src/MainWindow.ui" line="1269"/>
@@ -1498,157 +1498,162 @@ Please select another one</source>
       <translation>Обхід</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="146"/>
-      <source>%1 connected - Preset loaded automatically</source>
-      <translation>%1 підключено - Пресет завантажено автоматично</translation>
+      <location filename="../../src/MainWindow.cpp" line="107"/>
+      <source>%1 (%2) connected</source>
+      <translation>%1 (%2) підключено</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="166"/>
+      <location filename="../../src/MainWindow.cpp" line="108"/>
+      <source>%1 connected</source>
+      <translation>%1 підключено</translation>
+    </message>
+    <message>
+      <location filename="../../src/MainWindow.cpp" line="128"/>
       <source>Cannot execute script</source>
       <translation>Не вдалося виконати скрипт</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="167"/>
+      <location filename="../../src/MainWindow.cpp" line="129"/>
       <source>The current EEL file (at &apos;%1&apos;) does not exist anymore on the filesystem. Please reopen the file manually.</source>
       <translation>Поточний EEL файл (у &apos;%1&apos;) більше не існує в файловій системі. Будь ласка, повторно відкрийте файл вручну.</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="281"/>
+      <location filename="../../src/MainWindow.cpp" line="256"/>
       <source>Apps</source>
       <translation>Додатки</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="282"/>
+      <location filename="../../src/MainWindow.cpp" line="257"/>
       <source>Driver status</source>
       <translation>Статус драйвера</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="286"/>
+      <location filename="../../src/MainWindow.cpp" line="261"/>
       <source>Relink audio pipeline</source>
       <translation>Перепідключити аудіо потоки</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="288"/>
+      <location filename="../../src/MainWindow.cpp" line="263"/>
       <source>Reset to defaults</source>
       <translation>Відновити типові налаштування</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="289"/>
+      <location filename="../../src/MainWindow.cpp" line="264"/>
       <source>Load from file</source>
       <translation>Завантажити з файлу</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="290"/>
+      <location filename="../../src/MainWindow.cpp" line="265"/>
       <source>Save to file</source>
       <translation>Зберегти до файлу</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="292"/>
+      <location filename="../../src/MainWindow.cpp" line="267"/>
       <source>Open LiveprogIDE</source>
       <translation>Відкрити LiveprogIDE</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="294"/>
+      <location filename="../../src/MainWindow.cpp" line="269"/>
       <source>What&apos;s this... (Select UI element)</source>
       <translation>Що це... (Оберіть елемент інтерфейсу користувача)</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="398"/>
+      <location filename="../../src/MainWindow.cpp" line="364"/>
       <source>Bass/Misc</source>
       <translation>Баси/Різне</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="399"/>
+      <location filename="../../src/MainWindow.cpp" line="365"/>
       <source>Sound Positioning</source>
       <translation>Позиціювання звуку</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="400"/>
+      <location filename="../../src/MainWindow.cpp" line="366"/>
       <source>Reverb</source>
       <translation>Реверберація</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="401"/>
+      <location filename="../../src/MainWindow.cpp" line="367"/>
       <source>Equalizer</source>
       <translation>Еквалайзер</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="402"/>
+      <location filename="../../src/MainWindow.cpp" line="368"/>
       <source>Convolver</source>
       <translation>Конвольвер</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="403"/>
+      <location filename="../../src/MainWindow.cpp" line="369"/>
       <source>DDC</source>
       <translation>DDC</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="404"/>
+      <location filename="../../src/MainWindow.cpp" line="370"/>
       <source>Liveprog</source>
       <translation>Liveprog</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="405"/>
+      <location filename="../../src/MainWindow.cpp" line="371"/>
       <source>Graphic EQ</source>
       <translation>Графічний еквалайзер</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="417"/>
+      <location filename="../../src/MainWindow.cpp" line="383"/>
       <source>Launch application</source>
       <translation>Запустити застосунок</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="560"/>
+      <location filename="../../src/MainWindow.cpp" line="525"/>
       <source>Reset Configuration</source>
       <translation>Скинути налаштування</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="560"/>
+      <location filename="../../src/MainWindow.cpp" line="525"/>
       <source>Are you sure?</source>
       <translation>Ви впевнені?</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="584"/>
+      <location filename="../../src/MainWindow.cpp" line="549"/>
       <source>Load custom audio.conf</source>
       <translation>Завантажити користувацький audio.conf</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="596"/>
+      <location filename="../../src/MainWindow.cpp" line="561"/>
       <source>Save current audio.conf</source>
       <translation>Зберегти поточний audio.conf</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="1050"/>
+      <location filename="../../src/MainWindow.cpp" line="1015"/>
       <source>Very low</source>
       <translation>Дуже низька</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="1050"/>
+      <location filename="../../src/MainWindow.cpp" line="1015"/>
       <source>Low</source>
       <translation>Низька</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="1050"/>
+      <location filename="../../src/MainWindow.cpp" line="1015"/>
       <source>Medium</source>
       <translation>Середня</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="1050"/>
+      <location filename="../../src/MainWindow.cpp" line="1015"/>
       <source>High</source>
       <translation>Висока</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="1050"/>
+      <location filename="../../src/MainWindow.cpp" line="1015"/>
       <source>Extreme</source>
       <translation>Екстремальна</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="1170"/>
+      <location filename="../../src/MainWindow.cpp" line="1135"/>
       <source>Advanced waveform editing</source>
       <translation>Розширене редагування форми хвиль</translation>
     </message>
     <message>
-      <location filename="../../src/MainWindow.cpp" line="1171"/>
+      <location filename="../../src/MainWindow.cpp" line="1136"/>
       <source>Advanced waveform editing (default: -80;-100;0;0;0;0)
 
 Set threshold of auto-IR-cropping and add delay to a chopped/minimum phase transformed IR.
@@ -1820,7 +1825,7 @@ This setting is only in effect if IR optimization is enabled.
       <translation>Якщо</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/PresetAddRuleFragment.ui" line="55"/>
+      <location filename="../../src/interface/fragment/PresetAddRuleFragment.ui" line="58"/>
       <source>is connected, then load preset</source>
       <translation>під'єднано, потім завантажувати пресет</translation>
     </message>
@@ -1939,20 +1944,20 @@ This setting is only in effect if IR optimization is enabled.
       <translation>Правила не визначені</translation>
     </message>
     <message>
-      <location filename="../../src/interface/dialog/PresetRuleDialog.cpp" line="62"/>
-      <location filename="../../src/interface/dialog/PresetRuleDialog.cpp" line="70"/>
+      <location filename="../../src/interface/dialog/PresetRuleDialog.cpp" line="71"/>
+      <location filename="../../src/interface/dialog/PresetRuleDialog.cpp" line="79"/>
       <source>Cannot add new rule</source>
       <translation>Не вдалося додати нове правило</translation>
     </message>
     <message>
-      <location filename="../../src/interface/dialog/PresetRuleDialog.cpp" line="63"/>
+      <location filename="../../src/interface/dialog/PresetRuleDialog.cpp" line="72"/>
       <source>All connected audio devices have already a rule defined.
 You can only create one rule per device.</source>
       <translation>Усі під'єднані аудіопристрої вже мають визначене правило.
 Ви можете створити лише одне правило на один пристрій.</translation>
     </message>
     <message>
-      <location filename="../../src/interface/dialog/PresetRuleDialog.cpp" line="70"/>
+      <location filename="../../src/interface/dialog/PresetRuleDialog.cpp" line="79"/>
       <source>You have no presets saved.
 Please create one first before adding a new rule.</source>
       <translation>Ще не має збережених пресетів.
@@ -1962,12 +1967,17 @@ Please create one first before adding a new rule.</source>
   <context>
     <name>PresetRuleTableModel</name>
     <message>
-      <location filename="../../src/data/model/PresetRuleTableModel.cpp" line="77"/>
+      <location filename="../../src/data/model/PresetRuleTableModel.cpp" line="78"/>
       <source>Device</source>
       <translation>Пристрій</translation>
     </message>
     <message>
-      <location filename="../../src/data/model/PresetRuleTableModel.cpp" line="78"/>
+      <location filename="../../src/data/model/PresetRuleTableModel.cpp" line="79"/>
+      <source>Output route</source>
+      <translation>Вихідний маршрут</translation>
+    </message>
+    <message>
+      <location filename="../../src/data/model/PresetRuleTableModel.cpp" line="80"/>
       <source>Assigned preset</source>
       <translation>Застосований пресет</translation>
     </message>
@@ -2264,29 +2274,37 @@ Please create one first before adding a new rule.</source>
       <translation>не під'єднано</translation>
     </message>
     <message>
-      <location filename="../../src/main.cpp" line="184"/>
+      <location filename="../../src/main.cpp" line="190"/>
       <source>JamesDSP is an advanced audio processing engine available for Linux and Android systems.</source>
       <translation>JamesDSP - це передовий двигун обробки звуку, доступний для систем Linux та Android.</translation>
     </message>
     <message>
-      <location filename="../../src/utils/AutoStartManager.cpp" line="34"/>
+      <location filename="../../src/utils/AutoStartManager.cpp" line="33"/>
       <source>Auto-start permission has been denied</source>
       <translation>Дозвіл до автозапуску було відмовлено</translation>
     </message>
     <message>
-      <location filename="../../src/utils/AutoStartManager.cpp" line="35"/>
+      <location filename="../../src/utils/AutoStartManager.cpp" line="34"/>
       <source>Please run &apos;flatpak permission-set background background %1 yes&apos; and reenable auto-start.</source>
-      <translation type="unfinished"/>
+      <translation>Будь ласка, запустіть &apos;flatpak permission-set background background %1 yes&apos;  і знову увімкніть автозапуск.</translation>
     </message>
     <message>
-      <location filename="../../src/utils/AutoStartManager.cpp" line="37"/>
+      <location filename="../../src/utils/AutoStartManager.cpp" line="36"/>
       <source>Unknown error</source>
       <translation>Невідома помилка</translation>
     </message>
     <message>
-      <location filename="../../src/utils/AutoStartManager.cpp" line="38"/>
+      <location filename="../../src/utils/AutoStartManager.cpp" line="37"/>
       <source>Please make sure a XDG Background Portal implementation is available and active to use auto-start. %1</source>
       <translation>Переконайтеся, що реалізація XDG фонового порталу доступна й активна, щоб використовувати автозапуск. %1</translation>
+    </message>
+  </context>
+  <context>
+    <name>RouteListModel</name>
+    <message>
+      <location filename="../../src/data/model/RouteListModel.cpp" line="66"/>
+      <source>&lt;any output route&gt;</source>
+      <translation>&lt;будь-який маршрут виводу&gt;</translation>
     </message>
   </context>
   <context>
@@ -2309,7 +2327,7 @@ Please create one first before adding a new rule.</source>
     <message>
       <location filename="../../src/interface/fragment/SettingsFragment.ui" line="93"/>
       <source>Audio processing</source>
-      <translation type="unfinished"/>
+      <translation>Обробка аудіо</translation>
     </message>
     <message>
       <location filename="../../src/interface/fragment/SettingsFragment.ui" line="98"/>
@@ -2364,263 +2382,278 @@ Please create one first before adding a new rule.</source>
     <message>
       <location filename="../../src/interface/fragment/SettingsFragment.ui" line="299"/>
       <source>Convolver benchmarking</source>
-      <translation type="unfinished"/>
+      <translation>Бенчмарк конвольверу</translation>
     </message>
     <message>
       <location filename="../../src/interface/fragment/SettingsFragment.ui" line="316"/>
       <source>Benchmark now</source>
-      <translation type="unfinished"/>
+      <translation>Запустити бенчмарк</translation>
     </message>
     <message>
       <location filename="../../src/interface/fragment/SettingsFragment.ui" line="329"/>
       <source>Clear cached data</source>
-      <translation type="unfinished"/>
+      <translation>Очистити кеш даних</translation>
     </message>
     <message>
       <location filename="../../src/interface/fragment/SettingsFragment.ui" line="374"/>
       <source>Enable benchmarking on boot</source>
-      <translation type="unfinished"/>
+      <translation>Запускати бенчмарк при вході</translation>
     </message>
     <message>
       <location filename="../../src/interface/fragment/SettingsFragment.ui" line="384"/>
-      <source>Benchmarking on boot may cause increased CPU usage for about one minute after launch.</source>
-      <translation type="unfinished"/>
+      <source>Benchmarking on boot may cause increased CPU usage for about one minute after launch. Generating benchmarking data for your system can improve the performance of the convolver modules.</source>
+      <translation>Запуск бенчмарку при вході може призвести до зростання завантаження ЦП приблизно на одну хвилину після входу. Створення даних бенчмарку для вашої системи може покращити швидкодію модулів конвольверу. </translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="431"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="397"/>
+      <source>Workarounds</source>
+      <translation>Вирішення проблем</translation>
+    </message>
+    <message>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="409"/>
+      <source>Allow volume control of the virtual sink device</source>
+      <translation>Дозволити керування гучністю для віртуальних sink пристроїв</translation>
+    </message>
+    <message>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="419"/>
+      <source>Restart required to apply changes. May cause audio loss in some cases.</source>
+      <translation>Для застосування змін, необхідно перезапустити програму. В деяких випадках може призвести до втрати звуку.</translation>
+    </message>
+    <message>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="466"/>
       <source>Impluse responses</source>
       <translation>Відгуки імпульсу</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="448"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="483"/>
       <source>VDCs</source>
       <translation>VDC</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="462"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="497"/>
       <source>Liveprog scripts</source>
       <translation>Liveprog скрипти</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="499"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="534"/>
       <source>Save</source>
       <translation>Зберегти</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="508"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="543"/>
       <source>Built-in assets</source>
       <translation>Вбудовані ресурси</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="519"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="554"/>
       <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option will check on every startup if one of the default EEL scripts is missing. If this is the case the missing file(s) will automatically be restored from the resources. (It will not overwrite them if they already exist!)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
       <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ця опція перевірятиме під час кожного запуску, чи відсутній один зі стандартних скриптів EEL. Якщо це так, відсутні файл(и) буде автоматично відновлено з ресурсів. (Це не перезапише їх, якщо вони вже існують!)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="522"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="557"/>
       <source>Extract bundled assets on startup</source>
       <translation>Розпакування комплекту ресурсів під час запуску</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="542"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="577"/>
       <source>  Extract now  </source>
       <translation>  Видобути зараз  </translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="574"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="609"/>
       <source>Select sink/device to be processed</source>
       <translation>Виберіть джерело/пристрій для обробки</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="580"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="615"/>
       <source>Use default output device (recommended)</source>
       <translation>Використовувати стандартний пристрій виводу (рекомендовано)</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="587"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="622"/>
       <source>Manually select device</source>
       <translation>Виберіть пристрій вручну</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="599"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="634"/>
       <source>Device</source>
       <translation>Пристрій</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="627"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="662"/>
       <source>Blocklisted apps</source>
       <translation>Заблоковані додатки</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="633"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="668"/>
       <source>In the &apos;Apps&apos; section accessible using the three-dot menu on the main window, you can block apps that are playing back sound from being processed by JamesDSP.</source>
       <translation>У розділі &apos;Програми&apos;, доступне в меню з трьома крапками в головному вікні, ви можете заблокувати обробку застосунків, що обробляються з допомоги JamesDSP.</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="649"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="684"/>
       <source>Allowlist mode (apps need to be explicitly enabled instead)</source>
       <translation>Режим списку дозволів (замість цього потрібно вмикати застосунки)</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="680"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="715"/>
       <source>Clear list</source>
       <translation>Очистити список</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="709"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="744"/>
       <source>AutoEQ database</source>
       <translation>База даних AutoEQ</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="720"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="755"/>
       <source>Status:</source>
       <translation>Стан:</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="730"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="765"/>
       <source>unknown</source>
       <translation>невідомо</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="750"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="785"/>
       <source>  Manage local database  </source>
       <translation>  Керування локальною базою даних  </translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="782"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="817"/>
       <source>Run in background (tray icon)</source>
       <translation>Запустити у фоновому режимі (іконка в системному лотку)</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="788"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="823"/>
       <source>No, shutdown audio effects when closing app</source>
       <translation>Ні, вимикати звукові ефекти під час закриття програми</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="795"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="830"/>
       <source>Yes, minimize to tray icon when closing app</source>
       <translation>Так, згорнути до системного лотка при закритті застосунку</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="802"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="837"/>
       <source>Auto-start</source>
       <translation>Автозапуск</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="808"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="843"/>
       <source>Start minimized on boot</source>
       <translation>Запускати згорнутим під час завантаження</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="830"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="865"/>
       <source>Systray not supported on this system</source>
       <translation>Системний лоток не підтримується цією системою</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="880"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="915"/>
       <source>Visit Github repo</source>
       <translation>Відвідати GitHub репозиторій</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="906"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="941"/>
       <source>Run setup wizard</source>
       <translation>Запустити майстер налаштування</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="929"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.ui" line="964"/>
       <source>Close</source>
       <translation>Закрити</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="104"/>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="281"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="105"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="283"/>
       <source>benchmark data loaded</source>
-      <translation type="unfinished"/>
+      <translation>дані бенчмарку завантажено</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="215"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="216"/>
       <source>Unknown (%1)</source>
       <translation>Невідомо (%1)</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="275"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="277"/>
       <source>installed</source>
       <translation>встановлено</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="275"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="277"/>
       <source>not installed</source>
       <translation>не встановлено</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="279"/>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="460"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="281"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="462"/>
       <source>no benchmark data stored</source>
-      <translation type="unfinished"/>
+      <translation>немає збережених даних бенчмарку</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="302"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="304"/>
       <source>Override liveprog scripts?</source>
       <translation>Перевизначити скрипти liveprog?</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="303"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="305"/>
       <source>Do you want to override existing default liveprog scripts?
 If they have been modified, they will be reset.</source>
       <translation>Ви хочете перезаписати чинні за замовчуванням скрипти liveprog?
 Якщо вони були змінені, вони будуть скинуті.</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="306"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="308"/>
       <source>Extract assets</source>
       <translation>Розпакувати ресурси</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="306"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="308"/>
       <source>%1 files have been restored</source>
       <translation>%1 файлів було відновлено</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="398"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="400"/>
       <source>You are about to enable allowlist mode. JamesDSP will not process all applications by default while this mode is active. You need to explicitly allow each app to get processed in the &apos;Apps&apos; menu.
 </source>
       <translation>Ви збираєтеся увімкнути режим зі списком дозволів. JamesDSP не буде обробляти всі застосунки за замовчуванням, поки цей режим активний. Необхідно примусово дозволити кожному застосунку отримувати обробку в меню &apos;Застосунки&apos;.
 </translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="400"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="402"/>
       <source>Are you sure?</source>
       <translation>Ви впевнені?</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="401"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="403"/>
       <source>This action will reset your current blocklist or allowlist. Do you want to continue?</source>
       <translation>Ця дія призведе до скидання поточного списку блокувань або дозволів. Ви хочете продовжити?</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="429"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="431"/>
       <source>Warning</source>
       <translation>Увага</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="429"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="431"/>
       <source>Do you really want to restore the default menu layout?</source>
       <translation>Ви дійсно хочете відновити макет меню за замовчуванням?</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="452"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="454"/>
       <source>waiting for result...</source>
-      <translation type="unfinished"/>
+      <translation>очікування результату...</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="459"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="461"/>
       <source>Cache cleared</source>
-      <translation type="unfinished"/>
+      <translation>Кеш очищено</translation>
     </message>
     <message>
-      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="459"/>
+      <location filename="../../src/interface/fragment/SettingsFragment.cpp" line="461"/>
       <source>Benchmark data has been cleared. Restart this app to fully apply the changes.</source>
-      <translation type="unfinished"/>
+      <translation>Дані бенчмарку були очищені. Перезавантажте додаток, щоб застосувати зміни.</translation>
     </message>
   </context>
   <context>
@@ -2680,69 +2713,69 @@ If they have been modified, they will be reset.</source>
   <context>
     <name>TrayIcon</name>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="16"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="84"/>
       <source>&amp;Bypass</source>
       <translation>&amp;Обхід</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="22"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="90"/>
       <source>&amp;Presets</source>
       <translation>&amp;Пресети</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="25"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="93"/>
       <source>&amp;Convolver bookmarks</source>
       <translation>Закладки &amp;конвольвера</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="42"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="110"/>
       <source>JamesDSP for Linux</source>
       <translation>JamesDSP для Linux</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="96"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="164"/>
       <source>No presets found</source>
       <translation>Пресети не знайдено</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="140"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="208"/>
       <source>No impulse responses found</source>
       <translation>Не знайдено імпульсних відповідей</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="191"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="259"/>
       <source>&amp;Reload JamesDSP</source>
       <translation>&amp;Перезавантажити JamesDSP</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="195"/>
-      <location filename="../../src/interface/TrayIcon.cpp" line="273"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="263"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="341"/>
       <source>&amp;Quit</source>
       <translation>&amp;Вихід</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="199"/>
-      <location filename="../../src/interface/TrayIcon.cpp" line="269"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="267"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="337"/>
       <source>&amp;Show/hide window</source>
       <translation>&amp;Показати/сховати вікно</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="203"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="271"/>
       <source>Re&amp;verberation presets</source>
       <translation>Пресети ре&amp;верберації</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="205"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="273"/>
       <source>Off</source>
       <translation>Вимкнути</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="221"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="289"/>
       <source>&amp;Equalizer presets</source>
       <translation>Пресети &amp;еквалайзера</translation>
     </message>
     <message>
-      <location filename="../../src/interface/TrayIcon.cpp" line="234"/>
+      <location filename="../../src/interface/TrayIcon.cpp" line="302"/>
       <source>&amp;Crossfeed</source>
       <translation>&amp;Кроссфід</translation>
     </message>

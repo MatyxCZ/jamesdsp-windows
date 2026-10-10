@@ -3,8 +3,7 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/WasapiPipelineManager.h \
     $$PWD/WasapiAudioService.h \
-    $$PWD/WasapiAppManager.h \
-    $$PWD/WasapiDevice.h
+    $$PWD/WasapiAppManager.h
 
 SOURCES += \
     $$PWD/WasapiPipelineManager.cpp \

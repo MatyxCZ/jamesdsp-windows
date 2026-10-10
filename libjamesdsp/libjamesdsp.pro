@@ -5,7 +5,9 @@ DEFINES += LIBJAMESDSP_PLUGIN
 
 CONFIG += c++17
 
-QMAKE_CFLAGS += -std=gnu11 -O2
+QT -= gui widgets
+win32-msvc: QMAKE_CFLAGS += /std:c11
+else: QMAKE_CFLAGS += -std=gnu11 -O2 -Wno-error=incompatible-pointer-types -Wno-error=implicit-int -Wno-error=implicit-function-declaration
 #QMAKE_CFLAGS += -std=gnu11 -g3 -Og -gdwarf-2 -finline-functions
 
 CONFIG += warn_off # Disable warnings for library
@@ -16,9 +18,12 @@ DEBUG_ASAN: CONFIG += sanitizer sanitize_address
 DEFINES += CUSTOM_CMD
 
 # Redirect printf & android logging to our custom handlers
-win32: DEFINES += ANDROID_LOG_INFO=0 DEBUG
-else: DEFINES += printf=redirected_printf ANDROID_LOG_INFO=0 DEBUG
-win32: QMAKE_CFLAGS += /FI\"$$PWD/PrintfStdOutExtension.h\"
+win32-msvc {
+    DEFINES += ANDROID_LOG_INFO=0 DEBUG
+    QMAKE_CFLAGS += /FI\"$$PWD/PrintfStdOutExtension.h\"
+} else {
+    DEFINES += printf=redirected_printf ANDROID_LOG_INFO=0 DEBUG
+}
 
 BASEPATH = $$PWD/subtree/Main/libjamesdsp/jni/jamesdsp/jdsp/
 
@@ -46,7 +51,6 @@ HEADERS += \
     $$BASEPATH/Effects/eel2/numericSys/cpoly.h \
     $$BASEPATH/Effects/eel2/numericSys/libsamplerate/common.h \
     $$BASEPATH/Effects/eel2/numericSys/libsamplerate/samplerate.h \
-    $$BASEPATH/Effects/eel2/numericSys/libsamplerate/src_config.h \
     $$BASEPATH/Effects/eel2/numericSys/quadprog.h \
     $$BASEPATH/Effects/eel2/numericSys/solvopt.h \
     $$BASEPATH/Effects/eel2/s_str.h \
@@ -104,6 +108,7 @@ SOURCES += \
     $$BASEPATH/Effects/eel2/numericSys/cpoly.c \
     $$BASEPATH/Effects/eel2/numericSys/libsamplerate/samplerate.c \
     $$BASEPATH/Effects/eel2/numericSys/libsamplerate/src_sinc.c \
+    $$BASEPATH/Effects/eel2/numericSys/libsamplerate/src_linear.c \
     $$BASEPATH/Effects/eel2/numericSys/quadprog.c \
     $$BASEPATH/Effects/eel2/numericSys/solvopt.c \
     $$BASEPATH/Effects/eel2/s_str.c \

@@ -15,7 +15,7 @@ PresetRuleTableModel::PresetRuleTableModel(QObject *parent) : QAbstractTableMode
 
 int PresetRuleTableModel::rowCount(const QModelIndex &) const { return rules.count(); }
 
-int PresetRuleTableModel::columnCount(const QModelIndex &) const { return 2; }
+int PresetRuleTableModel::columnCount(const QModelIndex &) const { return 3; }
 
 bool PresetRuleTableModel::removeRows(int row, int count, const QModelIndex &parent)
 {
@@ -26,7 +26,7 @@ bool PresetRuleTableModel::removeRows(int row, int count, const QModelIndex &par
     endRemoveRows();
 
     QModelIndex begin = index(row, 0);
-    QModelIndex end = index(row, 1);
+    QModelIndex end = index(row, 2);
     emit dataChanged(begin, end);
     return true;
 }
@@ -42,7 +42,7 @@ bool PresetRuleTableModel::setData(const QModelIndex &index, const QVariant &val
         auto backup = rules[index.row()];
 
         switch (index.column()) {
-        case 1:
+        case 2:
             rules[index.row()].preset = value.toString();
             break;
         };
@@ -54,7 +54,7 @@ bool PresetRuleTableModel::setData(const QModelIndex &index, const QVariant &val
             backup.preset == current.preset)
             return false;
 
-        emit dataChanged(index, index.sibling(index.row(), 1));
+        emit dataChanged(index, index.sibling(index.row(), 2));
         return true;
     }
     return false;
@@ -67,7 +67,8 @@ QVariant PresetRuleTableModel::data(const QModelIndex &index, int role) const
         const auto & rule = rules[index.row()];
         switch (index.column()) {
         case 0: return rule.deviceName;
-        case 1: return rule.preset;
+        case 1: return rule.routeName;
+        case 2: return rule.preset;
         default: return {};
         };
     }
@@ -78,7 +79,8 @@ QVariant PresetRuleTableModel::headerData(int section, Qt::Orientation orientati
     if (orientation != Qt::Horizontal || role != Qt::DisplayRole) return {};
     switch (section) {
     case 0: return tr("Device");
-    case 1: return tr("Assigned preset");
+    case 1: return tr("Output route");
+    case 2: return tr("Assigned preset");
     default: return {};
     }
 }
@@ -88,6 +90,7 @@ Qt::ItemFlags PresetRuleTableModel::flags(const QModelIndex &index) const
     switch(index.column())
     {
     case 0:
+    case 1:
         return Qt::ItemIsSelectable | Qt::ItemIsEnabled | QAbstractTableModel::flags(index);
     default:
         return Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled | QAbstractTableModel::flags(index);
@@ -119,6 +122,18 @@ bool PresetRuleTableModel::containsDeviceId(const QString &deviceId) const
     for(int i = 0; i < rowCount(); i++)
     {
         if(rules[i].deviceId == deviceId)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool PresetRuleTableModel::containsDeviceAndRouteId(const QString &deviceId, const QString& routeId) const
+{
+    for(int i = 0; i < rowCount(); i++)
+    {
+        if(rules[i].deviceId == deviceId && rules[i].routeId == routeId)
         {
             return true;
         }

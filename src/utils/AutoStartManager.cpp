@@ -1,5 +1,5 @@
 #ifdef USE_PORTALS
-#include <libportal-qt5/portal-qt5.h>
+#include <libportal-qt6/portal-qt6.h>
 #endif
 
 #include "AutoStartManager.h"
@@ -7,7 +7,6 @@
 #include "config/AppConfig.h"
 #include "config/ConfigContainer.h"
 #include "config/ConfigIO.h"
-#include "utils/WindowUtils.h"
 
 #include <QDir>
 #include <QFile>
@@ -50,7 +49,7 @@ static void onPortalBackgroundRequest(GObject *source_object, GAsyncResult *res,
 
         Log::error(reason);
         Log::error(explanation);
-        QMessageBox::critical(nullptr, reason, explanation);
+        // QMessageBox::critical(nullptr, reason, explanation);
 
         Log::error("Auto-start disabled");
         AppConfig::instance().set(AppConfig::AutoStartEnabled, false);

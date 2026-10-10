@@ -16,7 +16,12 @@
 #define APP_FLAVOR_SHORT "Pipewire"
 #endif
 #endif
+#ifdef HEADLESS
+#define APP_HEADLESS_SUFFIX "(headless)"
+#else
+#define APP_HEADLESS_SUFFIX ""
+#endif
 
-#define APP_VERSION_FULL STR(APP_VERSION) " " APP_FLAVOR
+#define APP_VERSION_FULL STR(APP_VERSION) " " APP_FLAVOR " " APP_HEADLESS_SUFFIX
 
 #endif // VERSIONMACROS_H

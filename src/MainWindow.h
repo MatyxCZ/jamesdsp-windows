@@ -17,6 +17,7 @@
 
 #include <QCloseEvent>
 #include <QFrame>
+#include <QGraphicsColorizeEffect>
 #include <QItemSelection>
 #include <QMainWindow>
 #include <QSystemTrayIcon>
@@ -27,26 +28,15 @@
 #include "data/PresetProvider.h"
 #include "EventArgs.h"
 
+
 class IAudioService;
-class AppConfig;
 class AutostartManager;
-class EELParser;
-class ConfigContainer;
-class StyleHelper;
-class DBusProxy;
-class OverlayMsgProxy;
-class EELEditor;
-class PresetFragment;
-class SettingsFragment;
-class AudioStreamEngine;
-class Spectrograph;
-class QJsonTableModel;
 class TrayIcon;
-class QVBoxLayout;
-class AudioManager;
-class SingleInstanceMonitor;
+class StyleHelper;
 class StatusFragment;
-class IpcHandler;
+class SettingsFragment;
+class PresetFragment;
+class EELEditor;
 
 namespace Ui
 {
@@ -59,7 +49,8 @@ class MainWindow :
 	Q_OBJECT
 
 public:
-    explicit MainWindow(bool     statupInTray,
+    explicit MainWindow(IAudioService* audioService,
+                        bool     statupInTray,
 	                    QWidget *parent = nullptr);
 	~MainWindow();
 
@@ -113,7 +104,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    StyleHelper *_styleHelper;
+    StyleHelper *_styleHelper = nullptr;
+    QGraphicsColorizeEffect  *_redTintEffect = nullptr;
 
     bool _startupInTraySwitch;
     TrayIcon *_trayIcon;
@@ -127,7 +119,6 @@ private:
     FragmentHost<PresetFragment*>* _presetFragment     = nullptr;
 
     IAudioService* _audioService       = nullptr;
-    IpcHandler* _ipcHandler            = nullptr;
 
     bool _blockApply                   = false;
     bool _firstShowEvent               = true;

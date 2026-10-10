@@ -1,13 +1,3 @@
-#ifdef _WIN32
-#include <WasapiAudioService.h>
-#include <WasapiAppManager.h>
-#else
-#ifdef USE_PULSEAUDIO
-#include <PulseAudioService.h>
-#else
-#include <PipewireAudioService.h>
-#endif
-#endif
 
 #include "IAudioService.h"
 
@@ -18,13 +8,8 @@
 #include "config/ConfigContainer.h"
 #include "config/ConfigIO.h"
 #include "config/DspConfig.h"
-#include "data/AssetManager.h"
-#include "data/EelParser.h"
 #include "data/model/VdcDatabaseModel.h"
 #include "data/PresetManager.h"
-#include "data/VersionContainer.h"
-#include "interface/event/EventFilter.h"
-#include "interface/event/ScrollFilter.h"
 #include "interface/fragment/FirstLaunchWizard.h"
 #include "interface/fragment/PresetFragment.h"
 #include "interface/fragment/SettingsFragment.h"
@@ -33,30 +18,20 @@
 #include "interface/TrayIcon.h"
 #include "utils/AutoStartManager.h"
 #include "utils/Common.h"
-#ifndef _WIN32
-#include "utils/dbus/ClientProxy.h"
-#include "utils/dbus/IpcHandler.h"
-#include "utils/dbus/ServerAdaptor.h"
-#else
-#include "utils/dbus/IpcHandler.h"
-#include "utils/PipeIPCHandler.h"
-#endif
+
 #ifdef _WIN32
+#include <WasapiAudioService.h>
 #include <QProcess>
 #endif
 #include "utils/DebuggerUtils.h"
+#include "utils/DesktopServices.h"
 #include "utils/Log.h"
-#include "utils/OverlayMsgProxy.h"
-#include "utils/SingleInstanceMonitor.h"
 #include "utils/StyleHelper.h"
 
-//#include <audiostreamengine.h>
 #include <Animation/Animation.h>
 #include <eeleditor.h>
 #include <AeqSelector.h>
 #include <LiquidEqualizerWidget.h>
-#include <utils/DesktopServices.h>
-//#include <spectrograph.h>
 
 #include <QButtonGroup>
 #include <QClipboard>
@@ -71,55 +46,29 @@
 
 using namespace std;
 
-MainWindow::MainWindow(bool     statupInTray,
+MainWindow::MainWindow(IAudioService* audioService,
+                       bool statupInTray,
                        QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    _audioService(audioService)
 {
     ui->setupUi(this);
 #ifdef _WIN32
     setWindowTitle(tr("JamesDSP for Windows"));
 #endif
+#ifdef _WIN32
+    connect(static_cast<WasapiAudioService*>(_audioService), &WasapiAudioService::pipelineFailed,
+            this, [this] {
+        QMessageBox::warning(this, tr("Windows audio routing"),
+                             tr("The audio pipeline could not start. Check that your devices are connected, "
+                                "set Windows default playback to the virtual cable, and select different "
+                                "physical headphones or speakers in Settings > Devices. "
+                                "After correcting routing, use Relink audio pipeline in the three-dot menu."));
+    });
+#endif
 
-    // Prepare audio subsystem
-    {
-        Log::information("============ Initializing audio service ============");
-#ifdef _WIN32
-        Log::information("Compiled with WASAPI support.");
-        _audioService = new WasapiAudioService();
-#else
-#ifdef USE_PULSEAUDIO
-        Log::information("Compiled with PulseAudio support.");
-        Log::information("This application flavor does not support PipeWire or its PulseAudio compatibility mode.");
-        Log::information("If you want to use this application with PipeWire, you need to recompile this app with proper support enabled.");
-        Log::information("Refer to the README for more detailed information.");
-        Log::information("");
-        _audioService = new PulseAudioService();
-#else
-        Log::information("Compiled with PipeWire support.");
-        Log::information("This application flavor does not support PulseAudio.");
-        Log::information("If you want to use this application with PulseAudio, you need to recompile this app with proper support enabled.");
-        Log::information("Refer to the README for more detailed information.");
-        Log::information("");
-        Log::debug("Blocklisted apps: " + AppConfig::instance().get<QString>(AppConfig::AudioAppBlocklist) /* explicitly use as QString here */);
-        Log::debug("Blocklist mode: " + QString((AppConfig::instance().get<bool>(AppConfig::AudioAppBlocklistInvert) ? "allow" : "block")));
-        _audioService = new PipewireAudioService();
-#endif
-#endif
-#ifdef _WIN32
-        connect(static_cast<WasapiAudioService*>(_audioService), &WasapiAudioService::pipelineFailed,
-                this, [this] {
-            QMessageBox::warning(this, tr("Windows audio routing"),
-                                 tr("The audio pipeline could not start. Check that your devices are connected, "
-                                    "set Windows default playback to the virtual cable, and select different "
-                                    "physical headphones or speakers in Settings > Devices. "
-                                    "After correcting routing, use Relink audio pipeline in the three-dot menu."));
-        });
-#endif
-        connect(_audioService, &IAudioService::logOutputReceived, this, [](const QString& msg){ Log::kernel(msg); });
-        connect(&DspConfig::instance(), &DspConfig::updated, _audioService, &IAudioService::update);
-        connect(&DspConfig::instance(), &DspConfig::updatedExternally, _audioService, &IAudioService::update);
-    }
+
 
     // Allocate resources
     {
@@ -128,11 +77,7 @@ MainWindow::MainWindow(bool     statupInTray,
         _styleHelper         = new StyleHelper(this);
         _eelEditor           = new EELEditor(this);
         _trayIcon            = new TrayIcon(this);
-        _ipcHandler          = new IpcHandler(_audioService, this);
         _autostart           = new AutostartManager(this);
-#ifdef _WIN32
-        connect(_ipcHandler->pipeServer(), &PipeIPCServer::raiseWindow, this, &MainWindow::raiseWindow);
-#endif
 
         _appMgrFragment = new FragmentHost<AppManagerFragment*>(new AppManagerFragment(_audioService->appManager(), this), WAF::BottomSide, this);
         _statusFragment = new FragmentHost<StatusFragment*>(new StatusFragment(this), WAF::BottomSide, this);
@@ -176,11 +121,12 @@ MainWindow::MainWindow(bool     statupInTray,
     // Allocate pointers and init important variables
     {
         connect(&PresetManager::instance(), &PresetManager::wantsToWriteConfig, this, &MainWindow::applyConfig);
-        connect(&PresetManager::instance(), &PresetManager::presetAutoloaded, this, [this](const QString& device){
-            ui->info->setAnimatedText(tr("%1 connected - Preset loaded automatically").arg(device), true);
+        connect(&PresetManager::instance(), &PresetManager::presetAutoloaded, this, [this](const QString& device, const QString& route, bool anyRoute){
+            QString statusWithRoute = tr("%1 (%2) connected").arg(device).arg(route);
+            QString statusWithoutRoute = tr("%1 connected").arg(device);
+            ui->info->setAnimatedText(anyRoute ? statusWithoutRoute : statusWithRoute, true);
         });
 
-        connect(_audioService, &IAudioService::outputDeviceChanged, &PresetManager::instance(), &PresetManager::onOutputDeviceChanged);
         connect(_audioService, &IAudioService::convolverInfoChanged, this, &MainWindow::onConvolverInfoChanged);
 
         // Convolver file info
@@ -188,27 +134,6 @@ MainWindow::MainWindow(bool     statupInTray,
         ciArgs.channels = ciArgs.frames = -1;
         onConvolverInfoChanged(ciArgs);
         connect(_audioService, &IAudioService::convolverInfoChanged, this, &MainWindow::onConvolverInfoChanged);
-
-        _eelEditor->attachHost(_audioService);
-        connect(_eelEditor, &EELEditor::executionRequested, [this](QString path){
-            if (QFileInfo::exists(path) && QFileInfo(path).isFile())
-            {
-                ui->liveprog->setCurrentLiveprog(path);
-            }
-            else
-            {
-                QMessageBox::critical(_eelEditor, tr("Cannot execute script"),
-                                      tr("The current EEL file (at '%1') does not exist anymore on the filesystem. Please reopen the file manually.").arg(path));
-                return;
-            }
-
-            applyConfig();
-
-            if(path == ui->liveprog->currentLiveprog())
-            {
-                _audioService->reloadLiveprog();
-            }
-        });
     }
 
     // Prepare tray icon
@@ -267,6 +192,8 @@ MainWindow::MainWindow(bool     statupInTray,
         connect(_trayIcon, &TrayIcon::changeDisableFx, this,          &MainWindow::applyConfig);
 
         _trayIcon->setTrayVisible(AppConfig::instance().get<bool>(AppConfig::TrayIconEnabled) || _startupInTraySwitch);
+
+        connect(qApp, &QApplication::paletteChanged, _trayIcon, &TrayIcon::updateTheme);
     }
 
     // Populate preset lists
@@ -292,9 +219,7 @@ MainWindow::MainWindow(bool     statupInTray,
         connect(&DspConfig::instance(), &DspConfig::configBuffered, this, &MainWindow::loadConfig);
         DspConfig::instance().load();
 
-        connect(_settingsFragment->fragment(), &SettingsFragment::launchSetupWizard,       this, &MainWindow::launchFirstRunSetup);
-        connect(_settingsFragment->fragment(), &SettingsFragment::reopenSettings, _settingsFragment, &FragmentHost<SettingsFragment*>::slideOutIn);
-        connect(_styleHelper, &StyleHelper::iconColorChanged, _settingsFragment->fragment(), &SettingsFragment::updateButtonStyle);
+        //connect(_styleHelper, &StyleHelper::iconColorChanged, _settingsFragment->fragment(), &SettingsFragment::updateButtonStyle);
     }
 
     // Init 3-dot menu button
@@ -310,6 +235,19 @@ MainWindow::MainWindow(bool     statupInTray,
         ui->toolButton->setIconSize(QSize(16,16));
         ui->disableFX->setIconSize(QSize(16,16));
 
+
+        // Prepare red tint effect for fxDisable toggle button
+        _redTintEffect = new QGraphicsColorizeEffect(this);
+        _redTintEffect->setColor(Qt::red);
+        _redTintEffect->setStrength(0);
+        ui->disableFX->setGraphicsEffect(_redTintEffect);
+
+        auto fxToggleChanged = [this](bool toggled) {
+            _redTintEffect->setStrength(toggled ? 0.6 : 0.0);
+        };
+        fxToggleChanged(ui->disableFX->isChecked());
+        connect(ui->disableFX, &QPushButton::toggled, this, fxToggleChanged);
+
         // Attach menu
         QMenu *menu = new QMenu();
         menu->addAction(tr("Apps"), _appMgrFragment, &FragmentHost<AppManagerFragment*>::slideIn);
@@ -323,15 +261,13 @@ MainWindow::MainWindow(bool     statupInTray,
         menu->addAction(tr("Load from file"), this, SLOT(loadExternalFile()));
         menu->addAction(tr("Save to file"), this, SLOT(saveExternalFile()));
         menu->addSeparator();
-        menu->addAction(tr("Open LiveprogIDE"), _eelEditor, &EELEditor::show);
-        menu->addSeparator();
         menu->addAction(tr("What's this... (Select UI element)"), this, []()
         {
             QWhatsThis::enterWhatsThisMode();
         });
         ui->toolButton->setMenu(menu);
 
-        connect(_styleHelper, &StyleHelper::iconColorChanged, this, [this](bool white){
+        connect(_styleHelper, &StyleHelper::iconColorChanged, this, [this](bool white){       
             if (white)
             {
                 ui->set->setIcon(QIcon(":/icons/settings-white.svg"));
@@ -354,15 +290,6 @@ MainWindow::MainWindow(bool     statupInTray,
         _styleHelper->SetStyle();
         ui->eq_widget->setAccentColor(palette().highlight().color());
         ui->comp_response->setAccentColor(palette().highlight().color());
-    }
-
-    // Extract default EEL files if missing
-    {
-        if (AppConfig::instance().get<bool>(AppConfig::LiveprogAutoExtract))
-        {
-            AssetManager::instance().extractAll();
-
-        }
     }
 
     // Setup file selectors
@@ -397,8 +324,6 @@ MainWindow::MainWindow(bool     statupInTray,
         connect(ui->conv_files, &FileSelectionWidget::bookmarkAdded, ui->conv_fav, &FileSelectionWidget::enumerateFiles);
 
         // Liveprog
-        ui->liveprog->coupleIDE(_eelEditor);
-        ui->liveprog->updateList();
         connect(ui->liveprog, &LiveprogSelectionWidget::liveprogReloadRequested, _audioService, &IAudioService::reloadLiveprog);
         connect(ui->liveprog, &LiveprogSelectionWidget::unitLabelUpdateRequested, ui->info, qOverload<const QString&>(&FadingLabel::setAnimatedText));
     }
@@ -474,7 +399,6 @@ MainWindow::~MainWindow()
 {
     if(_audioService != nullptr)
         delete _audioService;
-    delete _ipcHandler;
     delete ui;
 }
 
@@ -1406,8 +1330,6 @@ void MainWindow::connectActions()
 
     connect(ui->eq_r_fixed,         &QRadioButton::clicked, this, &MainWindow::onEqModeUpdated);
     connect(ui->eq_r_flex,          &QRadioButton::clicked, this, &MainWindow::onEqModeUpdated);
-
-    connect(_eelEditor,             &EELEditor::scriptSaved, ui->liveprog, &LiveprogSelectionWidget::updateFromEelEditor);
 }
 
 // Setup wizard

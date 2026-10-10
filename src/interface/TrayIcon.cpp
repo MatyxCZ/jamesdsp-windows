@@ -3,11 +3,83 @@
 #include "config/AppConfig.h"
 #include "data/PresetProvider.h"
 #include "utils/Log.h"
-#include "utils/Common.h"
 
 #include <QApplication>
 #include <QMenu>
+#include <QDebug>
 #include <QDir>
+#include <QStyle>
+#include <QGuiApplication>
+#include <QStyleHints>
+
+namespace MenuIO
+{
+static QString buildString(QMenu *menu)
+{
+    QString out;
+
+    for (auto action : menu->actions())
+    {
+        if (action->isSeparator())
+        {
+            out += "separator;";
+        }
+        else if (action->menu())
+        {
+            out += action->menu()->property("tag").toString() + ";";
+        }
+        else
+        {
+            out += action->property("tag").toString() + ";";
+        }
+    }
+
+    return out;
+}
+
+static QMenu* buildMenu(QMenu   *options,
+                        QString  input,
+                        QWidget *owner)
+{
+    QMenu *out = new QMenu(owner);
+
+    for (auto item : input.split(";"))
+    {
+        if (item == "separator")
+        {
+            out->addSeparator();
+        }
+        else if (item.startsWith("menu"))
+        {
+            for (auto action : options->actions())
+            {
+                if (action->menu())
+                {
+                    if (action->menu()->property("tag") == item)
+                    {
+                        out->addMenu(action->menu());
+                        continue;
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (auto action : options->actions())
+            {
+                if (action->property("tag") == item)
+                {
+                    out->addAction(action);
+                    continue;
+                }
+            }
+        }
+    }
+
+    return out;
+}
+
+}
 
 TrayIcon::TrayIcon(QObject *parent) : QObject(parent)
 {
@@ -39,10 +111,37 @@ void TrayIcon::createTrayIcon()
 {
 	menuOwner = new QWidget();
 	trayIcon  = new QSystemTrayIcon(this);
-    trayIcon->setToolTip(tr("JamesDSP for Linux"));
-    trayIcon->setIcon(QIcon::fromTheme("jamesdsp-tray", QIcon(":/icons/icon.png")));
+	trayIcon->setToolTip(tr("JamesDSP for Linux"));
 
-    connect(trayIcon, &QSystemTrayIcon::activated, this, &TrayIcon::iconEventHandler);
+	updateTheme();
+
+	connect(trayIcon, &QSystemTrayIcon::activated, this, &TrayIcon::iconEventHandler);
+}
+
+void TrayIcon::updateTheme()
+{
+    // Best effort theme detection
+    bool isDark = true;
+    QString gtkTheme = QString::fromLocal8Bit(qgetenv("GTK_THEME"));
+    Log::error(gtkTheme);
+    if (gtkTheme.contains("light"))
+        isDark = false;
+    else if (gtkTheme.contains("dark"))
+        isDark = true;
+    else {
+        // Try to derive from current app palette otherwise
+        QPalette pal = QApplication::palette();
+        isDark = pal.color(QPalette::Window).lightness() < 128;
+    }
+
+    if (isDark)
+    {
+        trayIcon->setIcon(QIcon::fromTheme("jamesdsp-tray", QIcon(":/icons/jamesdsp-tray.svg")));
+    }
+    else
+    {
+        trayIcon->setIcon(QIcon::fromTheme("jamesdsp-tray", QIcon(":/icons/jamesdsp-tray-light.svg")));
+    }
 }
 
 void TrayIcon::setTrayVisible(bool visible)

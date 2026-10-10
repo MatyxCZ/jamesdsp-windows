@@ -32,6 +32,9 @@
     <p>
       This app provides various sound effects for PipeWire systems. It offers features such as automatic bass boost, dynamic range compression, reverberation, equalizers, surround effects, stereo wideness control, parametric equalization, scripting engine, and more. Users can also create their own audio effects using the EEL2 scripting language supported by the app. The app includes a minimal scripting IDE with syntax highlighting, code completion, and some debugging features.
     </p>
+    <p>
+      The app icon used in the FlatHub store was made by Papirus (https://github.com/PapirusDevelopmentTeam/papirus-icon-theme).
+    </p>
   </description>
   
   <url type="homepage">https://github.com/Audio4Linux/JDSP4Linux</url>
@@ -56,7 +59,38 @@
   </provides>
 
   <releases>
-    <release type="stable" version="2.6.0" date="2023-07-12T00:00:00Z">
+    <release type="stable" version="2.7.0" date="2023-12-10T00:00:00Z">
+      <description>
+        <ul>
+          <li>New libjamesdsp updates:</li>
+          <li>  EEL engine updated</li>
+          <li>  Several performance improvements and bugfixes</li>
+
+          <li>Per-device presets overhauled</li>
+
+          <li>New CLI operations implemented</li>
+          <li>  Manage and list per-device preset rules</li>
+          <li>  List all available output devices</li>
+
+          <li>Fixed various bugs and crashes</li>
+        </ul>
+      </description>
+    </release>
+    <release type="stable" version="2.6.1" date="2023-08-12T00:00:00Z">
+      <description>
+        <ul>
+          <li>New libjamesdsp updates:</li>
+          <li>  Compander: new time-frequency transform mode and zero latency</li>
+          <li>  EEL engine updated</li>
+          <li>  IIR EQ stability and efficiency improved</li>
+          <li>  Several performance improvements and bugfixes</li>
+          <li>Added settings UI for convolver benchmarking optimizations</li>
+          <li>Fixed distorted audio when enabling the stereo widener without setting the strength</li>
+          <li>Fixed Liveprog list parameters not displaying their current value correctly</li>
+        </ul>
+      </description>
+    </release>
+   <release type="stable" version="2.6.0" date="2023-07-12T00:00:00Z">
       <description>
         <ul>
           <li>New libjamesdsp updates:</li>
@@ -66,7 +100,7 @@
 	  <li>Several performance improvements and bugfixes</li>
         </ul>
       </description>
-    </release>
+   </release>
    <release type="stable" version="2.5.1" date="2023-06-17T00:00:00Z">
       <description>
         <ul>

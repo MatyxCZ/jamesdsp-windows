@@ -4,18 +4,20 @@
 #include "data/PresetManager.h"
 #include "data/model/PresetListModel.h"
 #include "utils/Log.h"
+#include "utils/QtCompat.h"
 #ifdef _WIN32
 #include "../PipeIPCHandler.h"
 #else
 #include "ServerAdaptor.h"
-#include "ClientProxy.h"
 #endif
 #include "utils/VersionMacros.h"
+
+#include <QVector>
 
 IpcHandler::IpcHandler(IAudioService* service, QObject* parent) : QObject(parent), _service(service)
 {
 #ifdef _WIN32
-    _pipeServer = new PipeIPCServer(_service, this);
+    _pipeServer = new PipeIPCServer(this, this);
     _registered = _pipeServer->start();
 #else
     _dbusAdapter = new ServiceAdaptor(this);
@@ -95,9 +97,7 @@ QString IpcHandler::get(const QString &key) const
 
     QVariant value = DspConfig::instance().get<QVariant>(key, &exists, false);
     if(!exists) {
-#ifdef _WIN32
-        // Return empty on Windows (no D-Bus error reply)
-#else
+#ifndef _WIN32
         sendErrorReply(QDBusError::InvalidArgs, "Configuration key does not exist");
 #endif
         return "";
@@ -111,15 +111,17 @@ QString IpcHandler::getAll() const
 }
 
 #ifdef _WIN32
-void IpcHandler::set(const QString &key, const QString &value) const
+bool IpcHandler::set(const QString &key, const QVariant &value) const
 {
-    setInternal(key, value);
+    return setInternal(key, value);
 }
 
-void IpcHandler::setAndCommit(const QString &key, const QString &value) const
+bool IpcHandler::setAndCommit(const QString &key, const QVariant &value) const
 {
-    setInternal(key, value);
+    if (!setInternal(key, value))
+        return false;
     commit();
+    return true;
 }
 #else
 void IpcHandler::set(const QString &key, const QDBusVariant &value) const
@@ -141,14 +143,27 @@ QStringList IpcHandler::getPresets() const
     return model->getList();
 }
 
+#ifdef _WIN32
+bool IpcHandler::loadPreset(const QString &name) const
+{
+    return PresetManager::instance().load(name);
+}
+
+bool IpcHandler::savePreset(const QString &name) const
+{
+    PresetManager::instance().save(name);
+    return PresetManager::instance().exists(name);
+}
+
+bool IpcHandler::deletePreset(const QString &name) const
+{
+    return PresetManager::instance().remove(name);
+}
+#else
 void IpcHandler::loadPreset(const QString &name) const
 {
     if(!PresetManager::instance().load(name))
-#ifdef _WIN32
-        ; // No error reply on Windows
-#else
         sendErrorReply(QDBusError::InvalidArgs, "Preset does not exist");
-#endif
 }
 
 void IpcHandler::savePreset(const QString &name) const
@@ -159,28 +174,67 @@ void IpcHandler::savePreset(const QString &name) const
 void IpcHandler::deletePreset(const QString &name) const
 {
     if(!PresetManager::instance().remove(name))
-#ifdef _WIN32
-        ; // No error reply on Windows
-#else
         sendErrorReply(QDBusError::InvalidArgs, "Preset does not exist");
+}
 #endif
+
+void IpcHandler::setPresetRule(const QString &deviceName, const QString &deviceId, const QString &routeName, const QString &routeId, const QString &preset) const
+{
+#ifdef USE_PULSEAUDIO
+    sendErrorReply(QDBusError::ErrorType::NotSupported, "This feature is only supported in the PipeWire version of JamesDSP");
+    return;
+#endif
+    PresetManager::instance().addRule(PresetRule(deviceName, deviceId, routeName, routeId, preset));
+}
+
+void IpcHandler::deletePresetRule(const QString &deviceId, const QString &routeId) const
+{
+#ifdef USE_PULSEAUDIO
+    sendErrorReply(QDBusError::ErrorType::NotSupported, "This feature is only supported in the PipeWire version of JamesDSP");
+    return;
+#endif
+    PresetManager::instance().removeRule(deviceId, routeId);
+}
+
+QList<PresetRule> IpcHandler::getPresetRules() const
+{
+#ifdef USE_PULSEAUDIO
+    sendErrorReply(QDBusError::ErrorType::NotSupported, "This feature is only supported in the PipeWire version of JamesDSP");
+    return QList<PresetRule>();
+#endif
+    return PresetManager::instance().rules().toList();
+}
+
+QList<IOutputDevice> IpcHandler::getOutputDevices() const
+{
+    auto devices = _service->outputDevices();
+    return QVector<IOutputDevice>(devices.begin(), devices.end()).toList();
+}
+
+void IpcHandler::relinkAudioPipeline() const
+{
+    _service->reloadService();
+    DspConfig::instance().commit();
 }
 
 #ifdef _WIN32
-void IpcHandler::setInternal(const QString &key, const QString &value) const
+bool IpcHandler::setInternal(const QString &key, const QVariant &value) const
 {
     QMetaEnum meta = QMetaEnum::fromType<DspConfig::Key>();
     bool valid = false;
-    auto resolvedKey = static_cast<DspConfig::Key>(meta.keyToValue(key.toLocal8Bit().constData(), &valid));
+    const auto resolvedKey = static_cast<DspConfig::Key>(meta.keyToValue(key.toLocal8Bit().constData(), &valid));
+    if (!valid)
+        return false;
 
-    if(!valid) {
-        return;
-    }
+    const int type = QtCompat::variantTypeId(value);
+    if (type != QMetaType::QString && type != QMetaType::Bool &&
+        type != QMetaType::Double && !value.canConvert(QMetaType::Int))
+        return false;
 
-    DspConfig::instance().set(resolvedKey, QVariant(value));
+    DspConfig::instance().set(resolvedKey, value);
+    return true;
 }
-#endif
-#ifndef _WIN32
+#else
 void IpcHandler::setInternal(const QString &key, const QDBusVariant &value) const
 {
     QMetaEnum meta = QMetaEnum::fromType<DspConfig::Key>();
@@ -193,11 +247,12 @@ void IpcHandler::setInternal(const QString &key, const QDBusVariant &value) cons
     }
 
     QVariant var = value.variant();
+    int type = QtCompat::variantTypeId(var);
     // Type validation
-    if(var.type() == QVariant::Type::String ||
-            var.type() == QVariant::Type::Bool ||
-            var.type() == QVariant::Type::Double ||
-            var.canConvert(QVariant::Type::Int)) {
+    if(type == QMetaType::QString ||
+       type == QMetaType::Bool ||
+       type == QMetaType::Double ||
+       var.canConvert(QMetaType::Int)) {
         DspConfig::instance().set(resolvedKey, var);
     }
     else

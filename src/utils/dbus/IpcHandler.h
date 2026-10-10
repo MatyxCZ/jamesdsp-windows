@@ -7,8 +7,12 @@
 #include <QDBusConnection>
 #include <QDBusContext>
 #include <QDBusVariant>
+#include <QList>
 #include <QObject>
 #endif
+
+#include "data/PresetRule.h"
+#include <QVariant>
 
 class ServiceAdaptor;
 class PipeIPCServer;
@@ -28,7 +32,7 @@ public:
     bool isServiceReady();
 
 #ifdef _WIN32
-    // On Windows, the pipe server handles IPC directly
+    // The pipe transport delegates to the same controller as D-Bus.
     PipeIPCServer* pipeServer() const { return _pipeServer; }
 #endif
 
@@ -54,8 +58,8 @@ public slots:
     QStringList getKeys() const;
     void commit() const;
 #ifdef _WIN32
-    void set(const QString &key, const QString &value) const;
-    void setAndCommit(const QString &key, const QString &value) const;
+    bool set(const QString &key, const QVariant &value) const;
+    bool setAndCommit(const QString &key, const QVariant &value) const;
 #else
     void set(const QString &key, const QDBusVariant &value) const;
     void setAndCommit(const QString &key, const QDBusVariant &value) const;
@@ -63,9 +67,23 @@ public slots:
     QString get(const QString &key) const;
     QString getAll() const;
     QStringList getPresets() const;
+#ifdef _WIN32
+    bool loadPreset(const QString &name) const;
+    bool savePreset(const QString &name) const;
+    bool deletePreset(const QString &name) const;
+#else
     void loadPreset(const QString &name) const;
     void savePreset(const QString &name) const;
     void deletePreset(const QString &name) const;
+#endif
+
+    void setPresetRule(const QString &deviceName, const QString &deviceId, const QString &routeName, const QString &routeId, const QString &preset) const;
+    void deletePresetRule(const QString &deviceId, const QString &routeId) const;
+    QList<PresetRule> getPresetRules() const;
+
+    QList<IOutputDevice> getOutputDevices() const;
+
+    void relinkAudioPipeline() const;
 
 private:
     IAudioService* _service;
@@ -74,7 +92,7 @@ private:
     PipeIPCServer* _pipeServer = nullptr;
     bool _registered = false;
 
-    void setInternal(const QString &key, const QString &value) const;
+    bool setInternal(const QString &key, const QVariant &value) const;
 #else
     QDBusConnection _connection = QDBusConnection::sessionBus();
     ServiceAdaptor* _dbusAdapter;

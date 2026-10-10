@@ -3,6 +3,7 @@
 
 #include <QAction>
 #include <QSystemTrayIcon>
+#include <QWidget>
 
 class TrayIcon :
 	public QObject
@@ -25,6 +26,7 @@ protected:
 public slots:
 	void   changedDisableFx(bool disabled);
 	void   setTrayVisible(bool visible);
+	void   updateTheme();
 
 signals:
 	void   iconActivated();

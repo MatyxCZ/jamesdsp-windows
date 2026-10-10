@@ -26,11 +26,13 @@ public:
 
     QVector<PresetRule> rules() const;
     void setRules(const QVector<PresetRule> &newRules);
+    bool addRule(const PresetRule& rule);
+    void removeRule(const QString &deviceId, const QString &routeId);
 
     PresetListModel *presetModel() const;
 
 signals:
-    void presetAutoloaded(const QString& deviceName);
+    void presetAutoloaded(const QString& deviceName, const QString& routeName, bool anyRoute);
     void wantsToWriteConfig();
 
 public slots:
@@ -41,7 +43,7 @@ public slots:
     bool load(const QString &filename);
     void save(const QString &name);
 
-    void onOutputDeviceChanged(const QString& deviceName, const QString& deviceId);
+    void onOutputDeviceChanged(const QString& deviceName, const QString& deviceId, const QString& outputRouteName);
 
     void loadRules();
     void saveRules() const;

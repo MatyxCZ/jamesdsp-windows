@@ -815,7 +815,10 @@ void on_device_info(void* object, const struct pw_device_info* info) {
           continue;
         }
 
-        if (const auto id = param.id; id == SPA_PARAM_Route) {
+        if (const auto id = param.id; id == SPA_PARAM_Route || id == SPA_PARAM_EnumRoute) {
+          if(id == SPA_PARAM_EnumRoute)
+              device.output_routes.clear();
+
           pw_device_enum_params((struct pw_device*)dd->proxy, 0, id, 0, -1, nullptr);
         }
       }
@@ -831,20 +834,25 @@ void on_device_event_param(void* object,
                            uint32_t index,
                            uint32_t next,
                            const struct spa_pod* param) {
-  if (id != SPA_PARAM_Route) {
+  if (id != SPA_PARAM_Route && id != SPA_PARAM_EnumRoute) {
     return;
   }
 
   auto* const dd = static_cast<proxy_data*>(object);
 
   const char* name = nullptr;
+  const char* description = nullptr;
 
   enum spa_direction direction {};
   enum spa_param_availability available {};
 
-  if (spa_pod_parse_object(param, SPA_TYPE_OBJECT_ParamRoute, nullptr, SPA_PARAM_ROUTE_direction,
-                           SPA_POD_Id(&direction), SPA_PARAM_ROUTE_name, SPA_POD_String(&name),
-                           SPA_PARAM_ROUTE_available, SPA_POD_Id(&available)) < 0) {
+  int res = spa_pod_parse_object(param, SPA_TYPE_OBJECT_ParamRoute, nullptr,
+                                 SPA_PARAM_ROUTE_direction, SPA_POD_Id(&direction),
+                                 SPA_PARAM_ROUTE_name, SPA_POD_String(&name),
+                                 SPA_PARAM_ROUTE_description, SPA_POD_String(&description),
+                                 SPA_PARAM_ROUTE_available, SPA_POD_Id(&available));
+
+  if (res < 0) {
     return;
   }
 
@@ -859,32 +867,45 @@ void on_device_event_param(void* object,
 
     auto* const pm = dd->pm;
 
-    if (direction == SPA_DIRECTION_INPUT) {
-      if (name != device.input_route_name || available != device.input_route_available) {
-        device.input_route_name = name;
-        device.input_route_available = available;
+    if(id == SPA_PARAM_Route) {
+        if (direction == SPA_DIRECTION_INPUT) {
+          if (name != device.input_route_name || description != device.input_route_desc || available != device.input_route_available) {
+            device.input_route_name = name;
+            device.input_route_desc = description;
+            device.input_route_available = available;
 
-        util::idle_add([pm, device] {
-          if (PwPipelineManager::exiting) {
-            return;
+            util::idle_add([pm, device] {
+              if (PwPipelineManager::exiting) {
+                return;
+              }
+
+              pm->device_input_route_changed.emit(device);
+            });
           }
+        } else if (direction == SPA_DIRECTION_OUTPUT) {
+          if (name != device.output_route_name || description != device.output_route_desc || available != device.output_route_available) {
+            device.output_route_name = name;
+            device.output_route_desc = description;
+            device.output_route_available = available;
 
-          pm->device_input_route_changed.emit(device);
-        });
-      }
-    } else if (direction == SPA_DIRECTION_OUTPUT) {
-      if (name != device.output_route_name || available != device.output_route_available) {
-        device.output_route_name = name;
-        device.output_route_available = available;
+            util::idle_add([pm, device] {
+              if (PwPipelineManager::exiting) {
+                return;
+              }
 
-        util::idle_add([pm, device] {
-          if (PwPipelineManager::exiting) {
-            return;
+              pm->device_output_route_changed.emit(device);
+            });
           }
-
-          pm->device_output_route_changed.emit(device);
-        });
-      }
+        }
+    }
+    else if(id == SPA_PARAM_EnumRoute) {
+        if(direction == SPA_DIRECTION_OUTPUT) {
+          RouteInfo route;
+          route.name = name;
+          route.description = description;
+          route.route_available = available;
+          device.output_routes.push_back(route);
+        }
     }
 
     break;
@@ -1131,7 +1152,7 @@ void on_registry_global(void* data,
       return;
     }
 
-    pw_node_add_listener(proxy, &nd->object_listener, &node_events, nd);
+    pw_proxy_add_object_listener(proxy, &nd->object_listener, &node_events, nd);
     pw_proxy_add_listener(proxy, &nd->proxy_listener, &node_proxy_events, nd);
 
     // sometimes PipeWire destroys the pointer before signal_idle is called,
@@ -1201,7 +1222,7 @@ void on_registry_global(void* data,
     pd->id = id;
     pd->serial = serial;
 
-    pw_link_add_listener(proxy, &pd->object_listener, &link_events, pd);
+    pw_proxy_add_object_listener(proxy, &pd->object_listener, &link_events, pd);
     pw_proxy_add_listener(proxy, &pd->proxy_listener, &link_proxy_events, pd);
 
     auto link_info = link_info_from_props(props);
@@ -1276,7 +1297,7 @@ void on_registry_global(void* data,
     pd->id = id;
     pd->serial = serial;
 
-    pw_module_add_listener(proxy, &pd->object_listener, &module_events, pd);
+    pw_proxy_add_object_listener(proxy, &pd->object_listener, &module_events, pd);
     pw_proxy_add_listener(proxy, &pd->proxy_listener, &module_proxy_events, pd);
 
     ModuleInfo m_info{.id = id, .serial = serial};
@@ -1307,7 +1328,7 @@ void on_registry_global(void* data,
     pd->id = id;
     pd->serial = serial;
 
-    pw_client_add_listener(proxy, &pd->object_listener, &client_events, pd);
+    pw_proxy_add_object_listener(proxy, &pd->object_listener, &client_events, pd);
     pw_proxy_add_listener(proxy, &pd->proxy_listener, &client_proxy_events, pd);
 
     ClientInfo c_info{.id = id, .serial = serial};
@@ -1366,7 +1387,7 @@ void on_registry_global(void* data,
         pd->id = id;
         pd->serial = serial;
 
-        pw_device_add_listener(proxy, &pd->object_listener, &device_events, pd);
+        pw_proxy_add_object_listener(proxy, &pd->object_listener, &device_events, pd);
         pw_proxy_add_listener(proxy, &pd->proxy_listener, &device_proxy_events, pd);
 
         DeviceInfo d_info{.id = id, .serial = serial, .media_class = media_class};
@@ -1432,7 +1453,7 @@ const struct pw_registry_events registry_events = {
 
 }  // namespace
 
-PwPipelineManager::PwPipelineManager() : header_version(pw_get_headers_version()), library_version(pw_get_library_version()) {
+PwPipelineManager::PwPipelineManager(bool sinkForceMaxVolume) : header_version(pw_get_headers_version()), library_version(pw_get_library_version()) {
   pw_init(nullptr, nullptr);
 
   spa_zero(core_listener);
@@ -1494,7 +1515,7 @@ PwPipelineManager::PwPipelineManager() : header_version(pw_get_headers_version()
   pw_properties_set(props_sink, "factory.name", "support.null-audio-sink");
   pw_properties_set(props_sink, PW_KEY_MEDIA_CLASS, tags::pipewire::media_class::sink);
   pw_properties_set(props_sink, "audio.position", "FL,FR");
-  pw_properties_set(props_sink, "monitor.channel-volumes", "false");
+  pw_properties_set(props_sink, "monitor.channel-volumes", !sinkForceMaxVolume ? "true" : "false");
 
   proxy_stream_output_sink = static_cast<pw_proxy*>(
       pw_core_create_object(core, "adapter", PW_TYPE_INTERFACE_Node, PW_VERSION_NODE, &props_sink->dict, 0));

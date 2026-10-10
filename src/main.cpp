@@ -1,20 +1,35 @@
-#include "MainWindow.h"
-#include "config/DspConfig.h"
-#include "utils/CliRemoteController.h"
-#ifndef _WIN32
-#include "utils/FindBinary.h"
+#ifdef _WIN32
+#include <WasapiAudioService.h>
+#include "utils/PipeIPCHandler.h"
+#elif defined(USE_PULSEAUDIO)
+#include <PulseAudioService.h>
+#else
+#include <PipewireAudioService.h>
 #endif
+
+#ifndef HEADLESS
+#include "MainWindow.h"
+#include <QApplication>
+#include <QStyle>
+#include <QScreen>
+#include <QSessionManager>
+#else
+#include <QCoreApplication>
+#endif
+
+#include "config/DspConfig.h"
+#include "data/AssetManager.h"
+#include "data/PresetRule.h"
+#include "utils/CliRemoteController.h"
 #include "utils/SingleInstanceMonitor.h"
 #include "utils/VersionMacros.h"
+#include "utils/dbus/IpcHandler.h"
 
-#include <QApplication>
+#include <IAudioService.h>
+
 #include <QCommandLineParser>
-#include <QLibraryInfo>
-#include <QScreen>
-#include <QStyle>
 #include <QScopeGuard>
 #include <QTextStream>
-#include <QSessionManager>
 #include <QTranslator>
 
 #include <string>
@@ -47,170 +62,96 @@ static std::string jdspTempDir()
 #endif
 }
 
+#ifndef HEADLESS
 static QTranslator* qtTranslator = nullptr;
 static QTranslator* translator = nullptr;
-
-#ifndef NO_CRASH_HANDLER
-#include "crash/airbag.h"
-#include "crash/stacktrace.h"
-
-static bool SPIN_ON_CRASH = false;
-
-void onExceptionRaised(int fd)
-{
-    Q_UNUSED(fd)
-#ifdef _WIN32
-    safe_printf(STDERR_FILENO, "Done! Crash report saved to %s\\crash.dmp.\n", jdspTempDir().c_str());
-#else
-    safe_printf(STDERR_FILENO, "Done! Crash report saved to /tmp/jamesdsp/crash.dmp.\n");
 #endif
 
-    if(SPIN_ON_CRASH)
-    {
-        safe_printf(STDERR_FILENO, "\nSpinning. Please run 'gdb jamesdsp %u' to continue debugging, Ctrl-C to quit, or Ctrl-\\ to dump core\n",
-#ifdef _WIN32
-        _getpid()
-#else
-        getpid()
-#endif
-        );
-        while(true)
-        {
-#ifdef _WIN32
-            Sleep(1000);
-#else
-            sleep(1);
-#endif
-        }
-    }
-    else
-    {
-        safe_printf(STDERR_FILENO, "\nConsider to launch this application with the parameter '--spinlock-on-crash' to wait for a debugger in case of a crash.\n");
-    }
-}
-
-#endif
-
-bool initCrashHandler(const char* exePath) {
-#ifndef NO_CRASH_HANDLER
-    QFile crashDmp(STACKTRACE_LOG);
-
-    bool lastSessionCrashed = false;
-    if(crashDmp.exists() && crashDmp.open(QFile::ReadOnly | QFile::Text))
-    {
-        QTextStream in(&crashDmp);
-        auto lastDmp = in.readAll();
-        crashDmp.close();
-
-        if(lastDmp.length() > 10)
-        {
-            lastSessionCrashed = true;
-            crashDmp.copy(STACKTRACE_LOG_OLD);
-            Log::backupLastLog();
-        }
-    }
-
-    EXECUTION_FILENAME = exePath;
-#ifdef _WIN32
-    airbag_init_fd(safe_open_wo_fd((jdspTempDir() + "\\crash.dmp").c_str()), onExceptionRaised, EXECUTION_FILENAME);
-#else
-    airbag_init_fd(safe_open_wo_fd("/tmp/jamesdsp/crash.dmp"), onExceptionRaised, EXECUTION_FILENAME);
-#endif
-    return lastSessionCrashed;
-#else
-    return false;
-#endif
-}
-
+#ifndef HEADLESS
 void initTranslator(const QLocale& locale) {
     qtTranslator = new QTranslator(qApp);
     translator = new QTranslator(qApp);
 
     // Locale & translation setup
-    qtTranslator->load(locale, "qt", "_", QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    bool _ = qtTranslator->load(locale, "qt", "_", QtCompat::libraryPath(QLibraryInfo::TranslationsPath));
     QApplication::installTranslator(qtTranslator);
-    translator->load(locale, "jamesdsp", "_", ":/translations");
+    _ = translator->load(locale, "jamesdsp", "_", ":/translations");
     QApplication::installTranslator(translator);
+    Q_UNUSED(_)
 }
+#endif
 
-MainWindow* initGui(bool launchInTray, bool watchConfig) {
-    // Workaround: Block DE's to resurrect multiple instances
-    QGuiApplication::setFallbackSessionManagementEnabled(false);
-    QObject::connect(qApp, &QGuiApplication::saveStateRequest, qApp, [](QSessionManager &manager){
-        // Block session restore requests
-        manager.setRestartHint(QSessionManager::RestartNever);
-        manager.release();
-    }, Qt::DirectConnection);
+IAudioService* initAudioService() {
+    // Prepare audio subsystem
+    IAudioService* service;
 
-    // Check if another instance is already running and switch to it if that's the case
-    auto *instanceMonitor = new SingleInstanceMonitor(qApp);
-    if (!instanceMonitor->isServiceReady())
-    {
-        // Only push existing app to foreground if not launched using --tray
-        if(!launchInTray)
-            instanceMonitor->handover();
-        return nullptr;
-    }
+    Log::information("============ Initializing audio service ============");
+#ifdef _WIN32
+    Log::information("Compiled with WASAPI support.");
+    service = new WasapiAudioService();
+#else
+#ifdef USE_PULSEAUDIO
+    Log::information("Compiled with PulseAudio support.");
+    Log::information("This application flavor does not support PipeWire or its PulseAudio compatibility mode.");
+    Log::information("If you want to use this application with PipeWire, you need to recompile this app with proper support enabled.");
+    Log::information("Refer to the README for more detailed information.");
+    Log::information("");
+    service = new PulseAudioService();
+#else
+    Log::information("Compiled with PipeWire support.");
+    Log::information("This application flavor does not support PulseAudio.");
+    Log::information("If you want to use this application with PulseAudio, you need to recompile this app with proper support enabled.");
+    Log::information("Refer to the README for more detailed information.");
+    Log::information("");
+    Log::debug("Blocklisted apps: " + AppConfig::instance().get<QString>(AppConfig::AudioAppBlocklist) /* explicitly use as QString here */);
+    Log::debug("Blocklist mode: " + QString((AppConfig::instance().get<bool>(AppConfig::AudioAppBlocklistInvert) ? "allow" : "block")));
+    service = new PipewireAudioService();
+#endif
+#endif
+    QObject::connect(service, &IAudioService::logOutputReceived, [](const QString& msg){ Log::kernel(msg); });
+    QObject::connect(&DspConfig::instance(), &DspConfig::updated, service, &IAudioService::update);
+    QObject::connect(&DspConfig::instance(), &DspConfig::updatedExternally, service, &IAudioService::update);
 
-    // Prepare DspConfig based on cmdline argument
-    DspConfig::instance(watchConfig);
-
-    auto* window = new MainWindow(launchInTray);
-    QObject::connect(instanceMonitor, &SingleInstanceMonitor::raiseWindow, window, &MainWindow::raiseWindow);
-
-    window->setGeometry(
-        QStyle::alignedRect(
-            Qt::LeftToRight,
-            Qt::AlignCenter,
-            window->size(),
-            QGuiApplication::primaryScreen()->geometry()
-            )
-        );
-    window->setWindowFlags(Qt::WindowContextHelpButtonHint | Qt::WindowCloseButtonHint);
-    window->hide();
-
-    if (!launchInTray)
-    {
-        /* Session manager: Prevent system from launching this app maximized on session restore (= system startup).
-         * Affects DEs with enabled session restore feature; is independent from the built-in autostart feature */
-        if(!qApp->isSessionRestored())
-        {
-            window->show();
-        }
-    }
-
-    return window;
+    return service;
 }
 
 using namespace std;
 int main(int   argc,
          char *argv[])
 {
-    // The legacy POSIX binary finder has no Windows implementation.
-#ifndef _WIN32
-    findyourself_init(argv[0]);
-    char exepath[PATH_MAX] = {};
-    find_yourself(exepath, sizeof(exepath));
-#else
-    const char* exepath = argv[0];
-#endif
+    // Locale workaround
+    auto systemLocale = QLocale::system();
+    QLocale::setDefault(QLocale::c());
+    setlocale(LC_NUMERIC, "C");
+
     // Ensure temp directory exists
 #ifdef _WIN32
     _mkdir(jdspTempDir().c_str());
 #else
     mkdir("/tmp/jamesdsp/", S_IRWXU);
 #endif
-    // Prepare crash handler if enabled
-    bool lastSessionCrashed = initCrashHandler(exepath);
 
     qRegisterMetaType<AppConfig::Key>();
     qRegisterMetaType<DspConfig::Key>();
 
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+#ifndef _WIN32
+    qDBusRegisterMetaType<PresetRule>();
+    qDBusRegisterMetaType<QList<PresetRule>>();
+    qDBusRegisterMetaType<Route>();
+    qDBusRegisterMetaType<QList<Route>>();
+    qDBusRegisterMetaType<IOutputDevice>();
+    qDBusRegisterMetaType<QList<IOutputDevice>>();
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+#endif
 
     QScopedPointer<QCoreApplication> app(new QCoreApplication(argc, argv));
-    initTranslator(QLocale::system());
+#ifndef HEADLESS
+    initTranslator(systemLocale);
+#endif
 
     QCoreApplication::setApplicationName("jamesdsp");
     QCoreApplication::setApplicationVersion(APP_VERSION_FULL);
@@ -219,23 +160,12 @@ int main(int   argc,
     QCommandLineOption tray(QStringList() << "t" << "tray", "Start minimized in systray (GUI)");
     QCommandLineOption watch(QStringList() << "w" << "watch", "Watch audio.conf and apply changes made by external apps automatically (GUI)");
     QCommandLineOption lang(QStringList() << "l" << "lang", "Override language (example: de, es, uk, zh_CN)", "lang");
-    QCommandLineOption spinlck(QStringList() << "d" << "spinlock-on-crash", "Wait for debugger in case of crash");
     QCommandLineOption silent(QStringList() << "s" << "silent", "Suppress log output");
     QCommandLineOption minVerbosity(QStringList() << "m" << "min-verbosity", "Minimum log verbosity (0 = Debug; ...; 5 = Critical)", "level");
     QCommandLineOption nocolor(QStringList() << "c" << "no-color", "Disable colored log output");
 
-    QCommandLineOption isConnected(QStringList() << "is-connected", "Check if JamesDSP service is active. Returns exit code 1 if not. (Remote)");
-    QCommandLineOption status(QStringList() << "status", "Show status (Remote)");
-    QCommandLineOption listKeys(QStringList() << "list-keys", "List available audio configuration keys (Remote)");
-    QCommandLineOption getAll(QStringList() << "get-all", "Get all audio configuration values (Remote)");
-    QCommandLineOption get(QStringList() << "get", "Get audio configuration value (Remote)", "key");
-    QCommandLineOption set(QStringList() << "set", "Set audio configuration value (format: key=value) (Remote)", "key=value");
-    QCommandLineOption loadPreset(QStringList() << "load-preset", "Load preset by name (Remote)", "name");
-    QCommandLineOption savePreset(QStringList() << "save-preset", "Save current settings as preset (Remote)", "name");
-    QCommandLineOption deletePreset(QStringList() << "delete-preset", "Delete preset by name (Remote)", "name");
-    QCommandLineOption listPresets(QStringList() << "list-presets", "List presets (Remote)");
 
-	QCommandLineParser parser;
+    QCommandLineParser parser;
     parser.setApplicationDescription(QObject::tr("JamesDSP is an advanced audio processing engine available for Linux and Android systems."));
     parser.addHelpOption();
     parser.addVersionOption();
@@ -243,37 +173,17 @@ int main(int   argc,
     // GUI
     parser.addOptions({tray, watch, lang});
 
-    // Debug
-    parser.addOption(spinlck);
-
     // Logging
     parser.addOptions({silent, nocolor, minVerbosity});
 
     // Remote control
-    auto remoteCmds = {isConnected, listKeys, getAll, get, set, loadPreset, savePreset, deletePreset, listPresets, status};
-    parser.addOptions(remoteCmds);
+    auto ctrl = CliRemoteController();
+    ctrl.registerOptions(parser);
 
     parser.process(*app.get());
 
     // Determine whether CLI mode should be activated
-    bool cliMode = false;
-    for(const auto& arg : remoteCmds) {
-        if(parser.isSet(arg)){
-            cliMode = true;
-            break;
-        }
-    }
-
-#ifndef NO_CRASH_HANDLER
-    SPIN_ON_CRASH = parser.isSet(spinlck);
-#endif
-
-    // Locale workaround
-    QLocale::setDefault(QLocale::c());
-    if(setlocale(LC_NUMERIC, "en_US.UTF-8") == nullptr)
-    {
-        setlocale(LC_NUMERIC, "C");
-    }
+    bool cliMode = ctrl.isAnyArgumentSet(parser);
 
     // Prepare logger
     bool minVerbValid = false;
@@ -285,76 +195,96 @@ int main(int   argc,
     Log::instance().setUseSimpleFormat(cliMode);
 
     if(cliMode) {
-        // CLI remote control mode
-        auto ctrl = CliRemoteController();
+        // Enable dbus client
+        ctrl.attachClient();
 
         // Parse CLI options
-        bool result = false;
-        if(parser.isSet(isConnected)) {
-            result = ctrl.isConnected();
-            Log::console(result ? "true" : "false", true);
-        }
-        else if(parser.isSet(listKeys))
-            result = ctrl.listKeys();
-        else if(!parser.value(set).isEmpty()) {
-            QPair<QString, QVariant> out;
-            bool valid = ConfigIO::readLine(parser.value(set), out);
-            if(!valid) {
-                Log::error("Syntax error. Please use this format: --set key=value or --set \"key=value with spaces\".");
-                result = false;
-            }
-            else {
-                result = ctrl.set(out.first, out.second);
-            }
-        }
-        else if(parser.isSet(getAll)) {
-            result = ctrl.getAll();
-        }
-        else if(!parser.value(get).isEmpty()) {
-            result = ctrl.get(parser.value(get));
-        }
-        else if(parser.isSet(listPresets))
-            result = ctrl.listPresets();
-        else if(!parser.value(loadPreset).isEmpty()) {
-            result = ctrl.loadPreset(parser.value(loadPreset));
-        }
-        else if(!parser.value(savePreset).isEmpty()) {
-            result = ctrl.savePreset(parser.value(savePreset));
-        }
-        else if(!parser.value(deletePreset).isEmpty()) {
-            result = ctrl.deletePreset(parser.value(deletePreset));
-        }
-        else if(parser.isSet(status))
-            result = ctrl.showStatus();
-
         // Set exit code accordingly
-        return result ? 0 : 1;
+        return ctrl.execute(parser) ? 0 : 1;
     }
     else {
-        // GUI service mode
+        AppConfig::instance().set(AppConfig::ExecutablePath, QCoreApplication::applicationFilePath());
+        Log::clear();
+
+#ifndef HEADLESS
+        // Restart qApp in GUI service mode
         app.reset();
         app.reset(new QApplication(argc, argv));
-        QString langOverride = parser.value(lang);
-        initTranslator(langOverride.isEmpty() ? QLocale::system() : QLocale(langOverride));
+#endif
 
-        Log::clear();
+        // Check if another instance is already running and switch to it if that's the case
+        QScopedPointer instanceMonitor(new SingleInstanceMonitor());
+        if(!instanceMonitor->isServiceReady()) {
+#ifdef HEADLESS
+            Log::console("Another JamesDSP instance is already active in the background. For information about controlling the active instance, see '--help'.", true);
+#else
+            // Only push existing app to foreground if not launched using --tray
+            if (!parser.isSet(tray))
+                return instanceMonitor->handover() ? 0 : 1;
+#endif
+            return 0;
+        }
 
         Log::information("Application version: " + QString(APP_VERSION_FULL));
         Log::information("Qt library version: " + QString(qVersion()));
+
+        QScopedPointer audioService(initAudioService());
+
+        // Extract default EEL files if missing
+        {
+            if (AppConfig::instance().get<bool>(AppConfig::LiveprogAutoExtract))
+            {
+                AssetManager::instance().extractAll();
+            }
+        }
+
+        DspConfig::instance(parser.isSet(watch)).load();
+        QScopedPointer ipc(new IpcHandler(audioService.get(), qApp));
+
+#ifndef HEADLESS
+        // Setup GUI
+        QString langOverride = parser.value(lang);
+        initTranslator(langOverride.isEmpty() ? systemLocale : QLocale(langOverride));
+
         Log::information("Using language: " + QString(QLocale::system().name()));
         Log::debug("Launched by system session manager: " + QString(qApp->isSessionRestored() ? "yes" : "no")); /* unreliable */
 
-    #ifndef NO_CRASH_HANDLER
-        if(lastSessionCrashed)
+        // Workaround: Block DE's to resurrect multiple instances
+        QObject::connect(qApp, &QGuiApplication::saveStateRequest, qApp, [](QSessionManager &manager){
+                // Block session restore requests
+                manager.setRestartHint(QSessionManager::RestartNever);
+                manager.release();
+            }, Qt::DirectConnection);
+
+        bool launchInTray = parser.isSet(tray);
+
+        auto* window = new MainWindow(audioService.get(), launchInTray);
+        QObject::connect(instanceMonitor.get(), &SingleInstanceMonitor::raiseWindow, window, &MainWindow::raiseWindow);
+#ifdef _WIN32
+        QObject::connect(ipc->pipeServer(), &PipeIPCServer::raiseWindow, window, &MainWindow::raiseWindow);
+#endif
+
+        window->setGeometry(
+            QStyle::alignedRect(
+                Qt::LeftToRight,
+                Qt::AlignCenter,
+                window->size(),
+                QGuiApplication::primaryScreen()->geometry()
+                )
+            );
+        window->setWindowFlags(Qt::WindowContextHelpButtonHint | Qt::WindowCloseButtonHint);
+        window->hide();
+
+        if (!launchInTray)
         {
-            Log::information("Last session crashed unexpectedly. A crash report has been saved here: " + QString(STACKTRACE_LOG_OLD));
+            /* Session manager: Prevent system from launching this app maximized on session restore (= system startup).
+         * Affects DEs with enabled session restore feature; is independent from the built-in autostart feature */
+            if(!qApp->isSessionRestored())
+            {
+                window->show();
+            }
         }
-    #endif
-
-        AppConfig::instance().set(AppConfig::ExecutablePath, QCoreApplication::applicationFilePath());
-        if (!initGui(parser.isSet(tray), parser.isSet(watch)))
-            return 0;
-
-        return QApplication::exec();
+#endif
+        return QCoreApplication::exec();
     }
 }

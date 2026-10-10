@@ -65,6 +65,7 @@ public:
         AudioAppBlocklist,
         AudioAppBlocklistInvert,
         AudioInactivityTimeout,
+        AudioVirtualSinkForceMaxValue,
 
         BenchmarkOnBoot,
         BenchmarkCacheC0,

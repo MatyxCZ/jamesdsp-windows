@@ -1,11 +1,11 @@
 #include "WasapiAudioService.h"
-#include "WasapiDevice.h"
 #include "DspHost.h"
 #include "utils/Log.h"
 
 #include <QDebug>
 #include <QTimer>
 #include <algorithm>
+#include <new>
 
 extern "C" {
 #ifdef DEBUG_FPE
@@ -29,21 +29,25 @@ WasapiAudioService::WasapiAudioService()
 
     // Allocate and initialize the DSP
     dsp = static_cast<JamesDSPLib*>(malloc(sizeof(JamesDSPLib)));
-    memset(dsp, 0, sizeof(JamesDSPLib));
+    if (!dsp)
+        throw std::bad_alloc();
 
     JamesDSPGlobalMemoryAllocation();
 #ifdef _MSC_VER
     initialize();
 #endif
-    JamesDSPInit(dsp, 128, sampleRate);
 
 
+    // Keep the GUI-thread COM apartment alive while the app manager owns its
+    // enumerator, including across pipeline shutdown/reinitialization.
+    comInitialized = SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     // Create and configure the pipeline before initializing the audio endpoints.
     pipeline = std::make_unique<WasapiPipelineManager>();
-    pipeline->setOutputDeviceId(
-        AppConfig::instance().get<QString>(AppConfig::AudioOutputDevice).toStdString());
-    // Initialize WASAPI (must be called before creating DspHost, since DspHost needs correct sample rate)
-    if (!pipeline->initialize())
+    const QString deviceId = AppConfig::instance().get<QString>(AppConfig::AudioOutputDevice);
+    pipeline->setOutputDeviceId(deviceId.toStdString());
+    // Initialize endpoints before constructing the host and attaching its callback.
+    const bool initialized = pipeline->initialize();
+    if (!initialized)
     {
         Log::error("Failed to initialize WASAPI audio pipeline. "
                    "The DSP will not process audio but the GUI will still work.");
@@ -54,6 +58,7 @@ WasapiAudioService::WasapiAudioService()
 
     // Update sample rate from pipeline
     sampleRate = pipeline->getSampleRate();
+    JamesDSPInit(dsp, static_cast<int>(dspBlockFrames), sampleRate);
     setupDsp();
 
     // Set up the DSP host with message handler
@@ -77,6 +82,11 @@ WasapiAudioService::WasapiAudioService()
                                       float* left_out, float* right_out, size_t frames) {
         processAudio(left_in, right_in, left_out, right_out, frames);
     });
+    if (initialized)
+    {
+        activeOutputDeviceId = deviceId;
+        QTimer::singleShot(0, this, [this, deviceId] { reportOutputDevice(deviceId); });
+    }
 
     // Listen for config changes
     connect(&AppConfig::instance(), &AppConfig::updated, this, &WasapiAudioService::onAppConfigUpdated);
@@ -86,7 +96,10 @@ WasapiAudioService::WasapiAudioService()
 
 WasapiAudioService::~WasapiAudioService()
 {
+    appMgr.reset();
     pipeline->shutdown();
+    if (comInitialized)
+        CoUninitialize();
 
     setPrintfStdOutHandler(nullptr, nullptr);
 
@@ -113,7 +126,9 @@ void WasapiAudioService::setupDsp()
     if (!dsp)
         return;
 
-    JamesDSPSetSampleRate(dsp, pipeline->getSampleRate(), 0);
+    // The Windows pthread adapter uses recursive critical sections, permitting
+    // the library's nested effect locks while refreshing rate-dependent state.
+    JamesDSPSetSampleRate(dsp, sampleRate, 1);
     dspFrameOffset = 0;
     dspOutputLeft.fill(0.0f);
     dspOutputRight.fill(0.0f);
@@ -123,11 +138,7 @@ void WasapiAudioService::processAudio(float* left_in, float* right_in,
                                       float* left_out, float* right_out, size_t frames)
 {
     std::lock_guard<std::mutex> lock(dspMutex);
-    const auto rate = pipeline->getSampleRate();
-    if (sampleRate != rate) {
-        sampleRate = rate;
-        setupDsp();
-    }
+    // Endpoint restarts configure the sample rate before attaching this callback.
 #ifdef DEBUG_FPE
     feenableexcept(FE_DIVBYZERO);
 #endif
@@ -161,14 +172,7 @@ void WasapiAudioService::onAppConfigUpdated(const AppConfig::Key& key, const QVa
 
     if (key == AppConfig::AudioOutputDevice)
     {
-        QString deviceId = value.toString();
-        if (!deviceId.isEmpty())
-        {
-            if (pipeline->setActiveDevice(deviceId.toStdString()))
-                emit outputDeviceChanged(deviceId, deviceId);
-            else
-                emit pipelineFailed();
-        }
+        restartPipeline(value.toString());
     }
     else if (key == AppConfig::AudioAppBlocklist ||
              key == AppConfig::AudioAppBlocklistInvert)
@@ -185,9 +189,51 @@ void WasapiAudioService::update(DspConfig* config)
 
 void WasapiAudioService::reloadService()
 {
+    restartPipeline(AppConfig::instance().get<QString>(AppConfig::AudioOutputDevice));
+}
+
+void WasapiAudioService::restartPipeline(const QString& deviceId)
+{
+    activeOutputDeviceId.clear();
+    // Join the audio worker before acquiring the DSP lock; it may be waiting for it.
     pipeline->shutdown();
+    pipeline->setAudioCallback({});
+    pipeline->setOutputDeviceId(deviceId.toStdString());
     if (!pipeline->initialize())
+    {
         emit pipelineFailed();
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> lock(dspMutex);
+        sampleRate = pipeline->getSampleRate();
+        setupDsp();
+        // Recreate sample-rate-dependent effects with all official cached keys.
+        _host->updateFromCache();
+    }
+    pipeline->setAudioCallback([this](float* left_in, float* right_in,
+                                     float* left_out, float* right_out, size_t frames) {
+        processAudio(left_in, right_in, left_out, right_out, frames);
+    });
+    activeOutputDeviceId = deviceId;
+    reportOutputDevice(deviceId);
+}
+
+void WasapiAudioService::reportOutputDevice(const QString& deviceId)
+{
+    if (deviceId.isEmpty() || deviceId != activeOutputDeviceId)
+        return;
+    for (const auto& device : pipeline->enumerateOutputDevices())
+    {
+        if (QString::fromStdString(device.id) == deviceId)
+        {
+            // A WASAPI render endpoint is itself the selected hardware output route.
+            emit outputDeviceChanged(QString::fromStdString(device.name),
+                                     QString::fromStdString(device.id),
+                                     QString::fromStdString(device.id));
+            return;
+        }
+    }
 }
 
 DspHost* WasapiAudioService::host()
@@ -207,10 +253,17 @@ std::vector<IOutputDevice> WasapiAudioService::sinkDevices()
     auto wasapiDevices = pipeline->enumerateOutputDevices();
     for (const auto& dev : wasapiDevices)
     {
-        devices.emplace_back(dev.id, dev.name);
+        IOutputDevice device(dev.id, dev.name, dev.id, dev.name);
+        device.output_routes.append(Route(dev.id, dev.name));
+        devices.push_back(std::move(device));
     }
 
     return devices;
+}
+
+std::vector<IOutputDevice> WasapiAudioService::outputDevices()
+{
+    return sinkDevices();
 }
 
 DspStatus WasapiAudioService::status()

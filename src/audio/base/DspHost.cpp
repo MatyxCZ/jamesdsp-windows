@@ -9,6 +9,13 @@
 #include "DspHost.h"
 #include "EventArgs.h"
 
+#include <QElapsedTimer>
+#include <QTextStream>
+#include <QThread>
+#include <QDebug>
+#include <cstring>
+#include <assert.h>
+
 extern "C" {
 #ifdef DEBUG_FPE
 #include <fenv.h>
@@ -17,13 +24,6 @@ extern "C" {
 #include <EELStdOutExtension.h>
 #include <jdsp_header.h>
 }
-
-#include <QElapsedTimer>
-#include <QTextStream>
-#include <QThread>
-#include <QDebug>
-#include <cstring>
-#include <assert.h>
 
 /* C interop */
 inline JamesDSPLib* cast(void* raw){
@@ -247,8 +247,8 @@ void DspHost::updateVdc(DspConfig *config)
 
 void DspHost::updateCompander(DspConfig *config)
 {
-    int granularity = config->get<int>(DspConfig::compander_granularity);
-    float timeconstant = config->get<float>(DspConfig::compander_timeconstant);
+    int granularity = max(config->get<int>(DspConfig::compander_granularity), 2);
+    float timeconstant = max(config->get<float>(DspConfig::compander_timeconstant), 0.22);
     int tftransforms = config->get<int>(DspConfig::compander_time_freq_transforms);
 
     std::string str = chopDoubleQuotes(config->get<QString>(DspConfig::compander_response)).toStdString();
@@ -276,6 +276,16 @@ void DspHost::updateCompander(DspConfig *config)
 
     CompressorSetParam(cast(this->_dsp), timeconstant, granularity, tftransforms, 0);
     CompressorSetGain(cast(this->_dsp), param, param + 7, 1);
+}
+
+void DspHost::updateStereoWide(DspConfig *config)
+{
+    if(config->get<bool>(DspConfig::stereowide_enable))
+        StereoEnhancementEnable(cast(this->_dsp));
+    else
+        StereoEnhancementDisable(cast(this->_dsp));
+
+    StereoEnhancementSetParam(cast(this->_dsp), config->get<float>(DspConfig::stereowide_level) / 100.0f);
 }
 
 void DspHost::updateReverb(DspConfig* config)
@@ -509,6 +519,7 @@ bool DspHost::update(DspConfig *config, bool ignoreCache)
     bool refreshGraphicEq = false;
     bool refreshVdc = false;
     bool refreshCompander = false;
+    bool refreshStereoWide = false;
 
 #ifdef DEBUG_FPE
     feenableexcept(FE_ALL_EXCEPT & ~FE_INEXACT & ~FE_INVALID);
@@ -626,19 +637,8 @@ bool DspHost::update(DspConfig *config, bool ignoreCache)
             JamesDSPSetPostGain(cast(this->_dsp), current.toFloat());
             break;
         case DspConfig::stereowide_enable:
-            if(current.toBool())
-                StereoEnhancementEnable(cast(this->_dsp));
-            else
-                StereoEnhancementDisable(cast(this->_dsp));
-            StereoEnhancementSetParam(cast(this->_dsp), _cache->get<float>(DspConfig::stereowide_level) / 100.0f);
-            break;
         case DspConfig::stereowide_level:
-            StereoEnhancementDisable(cast(this->_dsp));
-            StereoEnhancementSetParam(cast(this->_dsp), _cache->get<float>(DspConfig::stereowide_level) / 100.0f);
-            if(config->get<bool>(DspConfig::stereowide_enable))
-            {
-                StereoEnhancementEnable(cast(this->_dsp));
-            }
+            refreshStereoWide = true;
             break;
         case DspConfig::tone_enable:
             if(current.toBool())
@@ -698,6 +698,11 @@ bool DspHost::update(DspConfig *config, bool ignoreCache)
     if(refreshCompander)
     {
         updateCompander(config);
+    }
+
+    if(refreshStereoWide)
+    {
+        updateStereoWide(config);
     }
 
 #ifdef DEBUG_FPE

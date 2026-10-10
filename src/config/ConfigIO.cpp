@@ -1,9 +1,10 @@
 #include "ConfigIO.h"
 
 #include <fstream>
-#include <QMessageBox>
 #include <QRegularExpression>
 #include <string>
+
+#include "utils/QtCompat.h"
 
 QString ConfigIO::writeString(const QVariantMap &map)
 {
@@ -32,7 +33,7 @@ void ConfigIO::writeFile(const QString &    path,
 
 		for (const auto &e : map.keys())
 		{
-			if (map.value(e).type() == (QVariant::Type) QMetaType::Float)
+            if (QtCompat::variantTypeId(map.value(e)) == QMetaType::Float)
 			{
 				myfile << e.toStdString() << "=" << QString::number(map.value(e).toDouble(), 'f', 5).toStdString() << std::endl;
 			}
@@ -92,7 +93,7 @@ QVariantMap ConfigIO::readString(const QString &string)
 bool ConfigIO::readLine(const QString &line,
                         QPair<QString, QVariant> &out)
 {
-    if (line.trimmed().isEmpty() || line.trimmed()[0] == '#' || line.trimmed()[0] == '[')
+    if (line.trimmed().isEmpty() || line.trimmed()[0] == '#' || line.trimmed()[0] == '[' || !line.contains('='))
 	{
         return false; // Skip commented lines
 	}

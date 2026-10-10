@@ -8,9 +8,7 @@
 #include <QFile>
 #include <QNetworkAccessManager>
 
-#define REPO_ROOT QString("https://raw.githubusercontent.com/ThePBone/AutoEqPackages/main/")
-
-using namespace QtPromise;
+#define REPO_ROOT QString("https://raw.githubusercontent.com/ThePBone/AutoEqPackages/main")
 
 AeqPackageManager::AeqPackageManager(QObject *parent) : QObject(parent), nam(new QNetworkAccessManager(this))
 {
@@ -19,7 +17,7 @@ AeqPackageManager::AeqPackageManager(QObject *parent) : QObject(parent), nam(new
 
 QtPromise::QPromise<void> AeqPackageManager::installPackage(AeqVersion version, QWidget* hostWindow)
 {
-    return QPromise<void>{[this, version, hostWindow](
+    return QtPromise::QPromise<void>{[this, version, hostWindow](
         const QtPromise::QPromiseResolve<void>& resolve,
                 const QtPromise::QPromiseReject<void>& reject) {
 
@@ -49,7 +47,7 @@ bool AeqPackageManager::isPackageInstalled()
 
 QtPromise::QPromise<AeqVersion> AeqPackageManager::isUpdateAvailable()
 {
-    return QPromise<AeqVersion>{[this](
+    return QtPromise::QPromise<AeqVersion>{[this](
         const QtPromise::QPromiseResolve<AeqVersion>& resolve,
         const QtPromise::QPromiseReject<AeqVersion>& reject) {
 
@@ -78,9 +76,9 @@ QtPromise::QPromise<AeqVersion> AeqPackageManager::isUpdateAvailable()
         }};
 }
 
-QPromise<AeqVersion> AeqPackageManager::getRepositoryVersion()
+QtPromise::QPromise<AeqVersion> AeqPackageManager::getRepositoryVersion()
 {
-    return QPromise<AeqVersion>{[&](
+    return QtPromise::QPromise<AeqVersion>{[&](
         const QtPromise::QPromiseResolve<AeqVersion>& resolve,
                 const QtPromise::QPromiseReject<AeqVersion>& reject) {
 
@@ -132,10 +130,10 @@ QPromise<AeqVersion> AeqPackageManager::getRepositoryVersion()
 
 QtPromise::QPromise<AeqVersion> AeqPackageManager::getLocalVersion()
 {
-    return QPromise<AeqVersion>{[&](
+    return QtPromise::QPromise<AeqVersion>{[&](
         const QtPromise::QPromiseResolve<AeqVersion>& resolve,
                 const QtPromise::QPromiseReject<AeqVersion>& reject) {
-            QFile versionJson = (databaseDirectory() + "/version.json");
+            QFile versionJson(databaseDirectory() + "/version.json");
             if(!versionJson.exists())
             {
                 reject();
@@ -158,10 +156,10 @@ QtPromise::QPromise<AeqVersion> AeqPackageManager::getLocalVersion()
 
 QtPromise::QPromise<QVector<AeqMeasurement>> AeqPackageManager::getLocalIndex()
 {
-    return QPromise<QVector<AeqMeasurement>>{[&](
+    return QtPromise::QPromise<QVector<AeqMeasurement>>{[&](
         const QtPromise::QPromiseResolve<QVector<AeqMeasurement>>& resolve,
                 const QtPromise::QPromiseReject<QVector<AeqMeasurement>>& reject) {
-            QFile indexJson = (databaseDirectory() + "/index.json");
+            QFile indexJson(databaseDirectory() + "/index.json");
             if(!indexJson.exists())
             {
                 reject();

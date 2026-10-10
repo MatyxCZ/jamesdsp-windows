@@ -10,32 +10,28 @@ void CrossfeedConstructor(JamesDSPLib *jdsp)
 }
 void CrossfeedDestructor(JamesDSPLib *jdsp)
 {
-    jdsp_lock(jdsp);
-	if (jdsp->advXF.conv[0])
+	for (size_t i = 0; i < 3; ++i)
 	{
-		FFTConvolver2x4x2Free(jdsp->advXF.conv[0]);
-		FFTConvolver2x4x2Free(jdsp->advXF.conv[1]);
-		FFTConvolver2x4x2Free(jdsp->advXF.conv[2]);
-		free(jdsp->advXF.conv[0]);
-		free(jdsp->advXF.conv[1]);
-		free(jdsp->advXF.conv[2]);
-        jdsp->advXF.conv[0] = NULL;
-        jdsp->advXF.conv[1] = NULL;
-        jdsp->advXF.conv[2] = NULL;
+		if (jdsp->advXF.conv[i])
+		{
+			FFTConvolver2x4x2Free(jdsp->advXF.conv[i]);
+			free(jdsp->advXF.conv[i]);
+			jdsp->advXF.conv[i] = NULL;
+		}
 	}
 	if (jdsp->advXF.convLong_T_S)
 	{
 		TwoStageFFTConvolver2x4x2Free(jdsp->advXF.convLong_T_S);
 		free(jdsp->advXF.convLong_T_S);
-        jdsp->advXF.convLong_T_S = NULL;
+		jdsp->advXF.convLong_T_S = NULL;
 	}
 	if (jdsp->advXF.convLong_S_S)
 	{
 		FFTConvolver2x4x2Free(jdsp->advXF.convLong_S_S);
 		free(jdsp->advXF.convLong_S_S);
-        jdsp->advXF.convLong_S_S = NULL;
+		jdsp->advXF.convLong_S_S = NULL;
 	}
-    jdsp_unlock(jdsp);
+	jdsp->advXF.process = NULL;
 }
 void CrossfeedProcessFFTConvolver2x4x2(JamesDSPLib *jdsp, size_t n)
 {
@@ -50,30 +46,7 @@ void CrossfeedEnable(JamesDSPLib *jdsp, char enable)
     jdsp_lock(jdsp);
 	if (jdsp->crossfeedForceRefresh || !jdsp->advXF.conv[0] || !jdsp->advXF.conv[1] || !jdsp->advXF.conv[2] || (!jdsp->advXF.convLong_S_S && !jdsp->advXF.convLong_T_S))
 	{
-		if (jdsp->advXF.conv[0])
-		{
-			FFTConvolver2x4x2Free(jdsp->advXF.conv[0]);
-			FFTConvolver2x4x2Free(jdsp->advXF.conv[1]);
-			FFTConvolver2x4x2Free(jdsp->advXF.conv[2]);
-			free(jdsp->advXF.conv[0]);
-			free(jdsp->advXF.conv[1]);
-			free(jdsp->advXF.conv[2]);
-            jdsp->advXF.conv[0] = NULL;
-            jdsp->advXF.conv[1] = NULL;
-            jdsp->advXF.conv[2] = NULL;
-		}
-		if (jdsp->advXF.convLong_T_S)
-		{
-			TwoStageFFTConvolver2x4x2Free(jdsp->advXF.convLong_T_S);
-			free(jdsp->advXF.convLong_T_S);
-            jdsp->advXF.convLong_T_S = NULL;
-		}
-		if (jdsp->advXF.convLong_S_S)
-		{
-			FFTConvolver2x4x2Free(jdsp->advXF.convLong_S_S);
-			free(jdsp->advXF.convLong_S_S);
-            jdsp->advXF.convLong_S_S = NULL;
-		}
+		CrossfeedDestructor(jdsp);
 		jdsp->advXF.conv[0] = (FFTConvolver2x4x2 *)malloc(sizeof(FFTConvolver2x4x2));
 		FFTConvolver2x4x2Init(jdsp->advXF.conv[0]);
 		FFTConvolver2x4x2LoadImpulseResponse(jdsp->advXF.conv[0], (unsigned int)jdsp->blockSize, jdsp->blobsCh1[0], jdsp->blobsCh2[0], jdsp->blobsCh3[0], jdsp->blobsCh4[0], jdsp->blobsResampledLen);

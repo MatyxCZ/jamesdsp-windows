@@ -1,7 +1,9 @@
 #include "AppConfig.h"
 
 #include "ConfigIO.h"
+#ifndef HEADLESS
 #include "utils/AutoStartManager.h"
+#endif
 #include "utils/Common.h"
 
 #include <QStandardPaths>
@@ -32,7 +34,7 @@ AppConfig::AppConfig()
     DEFINE_KEY(ExecutablePath, "");
     DEFINE_KEY(VdcLastDatabaseId, -1);
     DEFINE_KEY(LastWindowGeometry, QByteArray());
-#ifdef USE_PORTALS
+#if defined(USE_PORTALS) || defined(HEADLESS)
     DEFINE_KEY(AutoStartEnabled, false);
 #elif defined(_WIN32)
     DEFINE_KEY(AutoStartEnabled, QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat).contains("JamesDSP"));
@@ -45,8 +47,9 @@ AppConfig::AppConfig()
     DEFINE_KEY(AudioAppBlocklist, QStringList());
     DEFINE_KEY(AudioAppBlocklistInvert, false);
     DEFINE_KEY(AudioInactivityTimeout, 10);
+    DEFINE_KEY(AudioVirtualSinkForceMaxValue, true);
 
-    DEFINE_KEY(BenchmarkOnBoot, false);
+    DEFINE_KEY(BenchmarkOnBoot, true);
     DEFINE_KEY(BenchmarkCacheC0, "");
     DEFINE_KEY(BenchmarkCacheC1, "");
 

@@ -5,16 +5,16 @@ conflict=""
 deps=""
 if [ $2 = "pipewire" ]; then
    conflict="jamesdsp-pulse"
-   deps="libarchive13, qtbase5-dev (>= 5.12.8), libqt5svg5 (>= 5.12.8), libglibmm-2.4-1v5, libglib2.0-0, libpipewire-0.3-0 (>= 0.3.19-4)"
+   deps="libarchive13, qt6-qpa-plugins (>= 6.2.4), libqt6gui6 (>= 6.2.4), libqt6dbus6 (>= 6.2.4), libqt6widgets6  (>= 6.2.4), libqt6svgwidgets6 (>= 6.2.4), libqt6dbus6 (>= 6.2.4), libqt6network6 (>= 6.2.4), libqt6svg6 (>= 6.2.4), libglibmm-2.4-1v5, libglib2.0-0, libpipewire-0.3-0 (>= 0.3.19-4)"
 elif [ $2 = "pulse" ]; then
    conflict="jamesdsp-pipewire"
-   deps="libarchive13, qtbase5-dev (>= 5.12.8), libqt5svg5 (>= 5.12.8), libglibmm-2.4-1v5, libglib2.0-0, libpulse-mainloop-glib0, libgstreamer1.0-0, gstreamer1.0-plugins-good"
+   deps="libarchive13, qt6-qpa-plugins (>= 6.2.4), libqt6gui6 (>= 6.2.4), libqt6dbus6 (>= 6.2.4), libqt6widgets6  (>= 6.2.4), libqt6svgwidgets6 (>= 6.2.4), libqt6dbus6 (>= 6.2.4), libqt6network6 (>= 6.2.4), libqt6svg6 (>= 6.2.4), libglibmm-2.4-1v5, libglib2.0-0, libpulse-mainloop-glib0, libgstreamer1.0-0, gstreamer1.0-plugins-good"
 else
   echo "ERROR: Unknown flavor"
   exit 1
 fi
 
-debname="jamesdsp-"$2"_"$1"_linux64"
+debname="jamesdsp-"$2"_"$1"_ubuntu22-04_amd64"
 echo $debname
 mkdir $debname
 mkdir $debname"/DEBIAN"

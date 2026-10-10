@@ -32,6 +32,7 @@ public slots:
     DspHost* host() override;
     IAppManager* appManager() override;
     std::vector<IOutputDevice> sinkDevices() override;
+    std::vector<IOutputDevice> outputDevices() override;
     DspStatus status() override;
 
     // Called by WasapiAppManager to get the pipeline
@@ -42,11 +43,14 @@ signals:
 
 private:
     void setupDsp();
+    void restartPipeline(const QString& deviceId);
+    void reportOutputDevice(const QString& deviceId);
     void processAudio(float* left_in, float* right_in,
                       float* left_out, float* right_out, size_t frames);
 
     std::unique_ptr<WasapiPipelineManager> pipeline;
     std::unique_ptr<WasapiAppManager> appMgr;
+    QString activeOutputDeviceId;
 
     JamesDSPLib* dsp = nullptr;
     DspHost* _host = nullptr;
@@ -59,6 +63,7 @@ private:
     size_t dspFrameOffset = 0;
 
     uint32_t sampleRate = 48000;
+    bool comInitialized = false;
     bool bypass = false;
 };
 

@@ -49,7 +49,6 @@ SingleInstanceMonitor::~SingleInstanceMonitor()
 #ifdef _WIN32
     if (_mutex)
     {
-        ReleaseMutex(_mutex);
         CloseHandle(_mutex);
     }
 #endif
@@ -83,7 +82,7 @@ bool SingleInstanceMonitor::handover()
     }
 
     QString response = client.sendCommand("RAISE_WINDOW");
-    if (response.startsWith("ERROR"))
+    if (response != "OK")
     {
         Log::error("Other instance returned error. Continuing anyway...");
         return false;
@@ -104,8 +103,9 @@ bool SingleInstanceMonitor::handover()
     else
     {
         QDBusPendingReply<> msg = m_dbInterface->raiseWindow();
+        msg.waitForFinished();
 
-        if (msg.isError() || msg.isValid())
+        if (msg.isError())
         {
             Log::error("Other instance returned (invalid) error message. Continuing anyway...");
         }

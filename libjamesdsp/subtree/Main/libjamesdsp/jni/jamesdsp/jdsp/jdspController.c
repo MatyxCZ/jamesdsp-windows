@@ -3,11 +3,15 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
-#include <float.h>
+#ifndef _WIN32
+#include <sys/time.h>
+#include <unistd.h>
+#endif
 #include "Effects/eel2/dr_flac.h"
 #include "Effects/eel2/ns-eel.h"
 #include "jdsp_header.h"
 #define TAG "EffectDSPMain"
+#include "PrintfStdOutExtension.h"
 
 #ifdef __ANDROID_API__
 #if __ANDROID_API__ < __ANDROID_API_J_MR2__
@@ -1251,12 +1255,15 @@ void JamesDSPFree(JamesDSPLib *jdsp)
 	}
 	if (jdsp->impulseResponseStorage.impulseResponse)
 		free(jdsp->impulseResponseStorage.impulseResponse);
-	if (jdsp->isMutexSuccess)
-		pthread_mutex_destroy(&jdsp->m_in_processing);
 	if (jdsp->enableASRC)
 	{
 		FreeIntegerASRCHandler(&jdsp->asrc[0]);
 		FreeIntegerASRCHandler(&jdsp->asrc[1]);
 	}
 	jdsp_unlock(jdsp);
+	if (jdsp->isMutexSuccess)
+	{
+		pthread_mutex_destroy(&jdsp->m_in_processing);
+		jdsp->isMutexSuccess = 0;
+	}
 }
