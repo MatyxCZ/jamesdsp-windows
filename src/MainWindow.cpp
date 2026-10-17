@@ -59,12 +59,13 @@ MainWindow::MainWindow(IAudioService* audioService,
 #endif
 #ifdef _WIN32
     connect(static_cast<WasapiAudioService*>(_audioService), &WasapiAudioService::pipelineFailed,
-            this, [this] {
+            this, [this](const QString& detail) {
         QMessageBox::warning(this, tr("Windows audio routing"),
-                             tr("The audio pipeline could not start. Check that your devices are connected, "
-                                "set Windows default playback to the virtual cable, and select different "
-                                "physical headphones or speakers in Settings > Devices. "
-                                "After correcting routing, use Relink audio pipeline in the three-dot menu."));
+                             tr("The audio pipeline could not start:\n%1\n\n"
+                                "In Settings > Devices, select the virtual playback endpoint (for example, CABLE Input) "
+                                "as the JamesDSP input and different physical headphones or speakers as the output. "
+                                "Route the desired apps or Windows playback into that virtual endpoint. "
+                                "After correcting routing, use Relink audio pipeline in the three-dot menu.").arg(detail));
     });
 #endif
 

@@ -604,6 +604,18 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_16">
          <item>
+          <widget class="QGroupBox" name="windowsInputGroup">
+           <property name="title">
+            <string>JamesDSP virtual input (playback endpoint)</string>
+           </property>
+           <layout class="QVBoxLayout" name="windowsInputLayout">
+            <item>
+             <widget class="QComboBox" name="dev_input_select"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <widget class="QGroupBox" name="devices_group">
            <property name="title">
             <string>Select sink/device to be processed</string>
@@ -665,9 +677,11 @@
             <item>
              <widget class="QLabel" name="windowsRoutingHelp">
               <property name="text">
-               <string>Set Windows default playback/output to CABLE Input (VB-Audio Virtual Cable), so apps send audio into the cable.
+               <string>Select the virtual playback endpoint (for example, CABLE Input) as the JamesDSP input above, not the recording endpoint CABLE Output. JamesDSP captures this saved endpoint regardless of the Windows default device.
 
-Here, choose your physical headphones or speakers from the Device list as the JamesDSP output. Windows playback and JamesDSP output must be different endpoints; do not select CABLE Input here.
+Route the desired apps or Windows playback into that virtual endpoint in Windows sound settings. Choose your physical headphones or speakers as the JamesDSP output; input and output must be different endpoints. JamesDSP never changes Windows defaults.
+
+If an endpoint ID changes after reboot, JamesDSP recovers it only when exactly one active device has the saved friendly name. If a device is missing or its name is ambiguous, reconnect it or manually reselect both endpoints as needed.
 
 If playback stutters, try matching the cable and headphones sample rates in Windows sound device properties (Advanced / Default format), then relink. Matching rates (for example, 192000 Hz when both devices support it) has helped in testing, but is a workaround, not proof of the root cause.
 

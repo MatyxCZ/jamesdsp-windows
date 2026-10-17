@@ -43,7 +43,10 @@ AppConfig::AppConfig()
 #endif
 
     DEFINE_KEY(AudioOutputUseDefault, true);
+    DEFINE_KEY(AudioInputDevice, QString());
+    DEFINE_KEY(AudioInputDeviceName, QString());
     DEFINE_KEY(AudioOutputDevice, "");
+    DEFINE_KEY(AudioOutputDeviceName, QString());
     DEFINE_KEY(AudioAppBlocklist, QStringList());
     DEFINE_KEY(AudioAppBlocklistInvert, false);
     DEFINE_KEY(AudioInactivityTimeout, 10);

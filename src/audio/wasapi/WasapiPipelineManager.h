@@ -1,6 +1,8 @@
 #ifndef WASAPIPIPELINEMANAGER_H
 #define WASAPIPIPELINEMANAGER_H
 
+#include "WasapiDeviceSelection.h"
+
 #include <audioclient.h>
 #include <audiopolicy.h>
 #include <mmdeviceapi.h>
@@ -35,22 +37,23 @@ public:
     uint32_t getSampleRate() const { return sampleRate; }
     bool isProcessing() const { return !bypass && running; }
 
-    struct DeviceInfo {
-        std::string name;
-        std::string id;
-        bool isDefault = false;
-    };
+    using DeviceInfo = wasapi::DeviceInfo;
 
-    std::vector<DeviceInfo> enumerateOutputDevices() const;
-
-    void setOutputDeviceId(const std::string& deviceId) { currentDeviceId = deviceId; }
-    bool setActiveDevice(const std::string& deviceId);
-
-signals:
-    void outputDeviceChanged(const std::string& deviceName, const std::string& deviceId);
+    // Enumeration works before initialize(), including after a failed start.
+    std::vector<DeviceInfo> enumerateOutputDevices();
+    void setDeviceSelection(const std::string& inputId, const std::string& inputName,
+                            const std::string& outputId, const std::string& outputName);
+    const DeviceInfo& resolvedInputDevice() const { return activeInput; }
+    const DeviceInfo& resolvedOutputDevice() const { return activeOutput; }
+    const std::string& lastError() const { return errorDetail; }
 
 private:
     void processingLoop();
+    bool initializeEndpoints();
+    bool ensureDeviceEnumerator();
+    bool collectActiveDevices(std::vector<DeviceInfo>& devices);
+    bool openSelectedDevice(const DeviceInfo& selected, const char* role, IMMDevice** device);
+    bool setError(const std::string& detail);
 
     // WASAPI objects
     IMMDeviceEnumerator* deviceEnumerator = nullptr;
@@ -68,7 +71,11 @@ private:
     std::atomic<bool> bypass = false;
     std::atomic<uint32_t> sampleRate = 48000;
 
-    std::string currentDeviceId;
+    DeviceInfo savedInput;
+    DeviceInfo savedOutput;
+    DeviceInfo activeInput;
+    DeviceInfo activeOutput;
+    std::string errorDetail;
 
     mutable std::mutex callbackMutex;
     AudioCallback _audioCallback;

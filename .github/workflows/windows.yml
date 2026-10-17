@@ -27,6 +27,18 @@ jobs:
           arch: win64_msvc2019_64
           cache: true
 
+      - name: Test saved WASAPI device selection
+        shell: powershell
+        run: |
+          . ./meta/windows/Environment.ps1
+          Initialize-MsvcEnvironment
+          $test = Join-Path $env:RUNNER_TEMP 'WasapiDeviceSelectionTest.exe'
+          $object = Join-Path $env:RUNNER_TEMP 'WasapiDeviceSelectionTest.obj'
+          & cl.exe /nologo /std:c++17 /EHsc /W4 "/Fe:$test" "/Fo:$object" ./tests/WasapiDeviceSelectionTest.cpp
+          if ($LASTEXITCODE -ne 0) { throw 'Device-selection test compilation failed.' }
+          & $test
+          if ($LASTEXITCODE -ne 0) { throw 'Device-selection regression failed.' }
+
       - name: Build and package Release
         shell: powershell
         run: |

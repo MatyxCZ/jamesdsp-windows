@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QTimer>
+#include <QScopedValueRollback>
 #include <algorithm>
 #include <new>
 
@@ -43,15 +44,14 @@ WasapiAudioService::WasapiAudioService()
     comInitialized = SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     // Create and configure the pipeline before initializing the audio endpoints.
     pipeline = std::make_unique<WasapiPipelineManager>();
-    const QString deviceId = AppConfig::instance().get<QString>(AppConfig::AudioOutputDevice);
-    pipeline->setOutputDeviceId(deviceId.toStdString());
+    configurePipelineSelection();
     // Initialize endpoints before constructing the host and attaching its callback.
     const bool initialized = pipeline->initialize();
     if (!initialized)
     {
-        Log::error("Failed to initialize WASAPI audio pipeline. "
-                   "The DSP will not process audio but the GUI will still work.");
-        QTimer::singleShot(0, this, [this] { emit pipelineFailed(); });
+        const QString detail = QString::fromStdString(pipeline->lastError());
+        Log::error("Failed to initialize WASAPI audio pipeline: " + detail);
+        QTimer::singleShot(0, this, [this, detail] { emit pipelineFailed(detail); });
     }
     // Start session enumeration after COM has been initialized by the pipeline.
     appMgr = std::make_unique<WasapiAppManager>(this);
@@ -84,7 +84,8 @@ WasapiAudioService::WasapiAudioService()
     });
     if (initialized)
     {
-        activeOutputDeviceId = deviceId;
+        saveResolvedSelection();
+        const QString deviceId = activeOutputDeviceId;
         QTimer::singleShot(0, this, [this, deviceId] { reportOutputDevice(deviceId); });
     }
 
@@ -168,11 +169,12 @@ void WasapiAudioService::processAudio(float* left_in, float* right_in,
 
 void WasapiAudioService::onAppConfigUpdated(const AppConfig::Key& key, const QVariant& value)
 {
-    Q_UNUSED(value)
+    if (savingResolvedSelection)
+        return;
 
-    if (key == AppConfig::AudioOutputDevice)
+    if (key == AppConfig::AudioInputDevice || key == AppConfig::AudioOutputDevice)
     {
-        restartPipeline(value.toString());
+        restartPipeline();
     }
     else if (key == AppConfig::AudioAppBlocklist ||
              key == AppConfig::AudioAppBlocklistInvert)
@@ -189,19 +191,47 @@ void WasapiAudioService::update(DspConfig* config)
 
 void WasapiAudioService::reloadService()
 {
-    restartPipeline(AppConfig::instance().get<QString>(AppConfig::AudioOutputDevice));
+    restartPipeline();
 }
 
-void WasapiAudioService::restartPipeline(const QString& deviceId)
+void WasapiAudioService::configurePipelineSelection()
+{
+    auto& config = AppConfig::instance();
+    pipeline->setDeviceSelection(config.get<QString>(AppConfig::AudioInputDevice).toStdString(),
+                                 config.get<QString>(AppConfig::AudioInputDeviceName).toStdString(),
+                                 config.get<QString>(AppConfig::AudioOutputDevice).toStdString(),
+                                 config.get<QString>(AppConfig::AudioOutputDeviceName).toStdString());
+}
+
+void WasapiAudioService::saveResolvedSelection()
+{
+    // Do not block AppConfig signals: the settings UI must see recovered IDs.
+    QScopedValueRollback<bool> guard(savingResolvedSelection, true);
+    auto& config = AppConfig::instance();
+    const auto save = [&config](AppConfig::Key key, const std::string& value) {
+        const QString text = QString::fromStdString(value);
+        if (config.get<QString>(key) != text)
+            config.set(key, text);
+    };
+    const auto& input = pipeline->resolvedInputDevice();
+    const auto& output = pipeline->resolvedOutputDevice();
+    save(AppConfig::AudioInputDeviceName, input.name);
+    save(AppConfig::AudioOutputDeviceName, output.name);
+    save(AppConfig::AudioInputDevice, input.id);
+    save(AppConfig::AudioOutputDevice, output.id);
+    activeOutputDeviceId = QString::fromStdString(output.id);
+}
+
+void WasapiAudioService::restartPipeline()
 {
     activeOutputDeviceId.clear();
     // Join the audio worker before acquiring the DSP lock; it may be waiting for it.
     pipeline->shutdown();
     pipeline->setAudioCallback({});
-    pipeline->setOutputDeviceId(deviceId.toStdString());
+    configurePipelineSelection();
     if (!pipeline->initialize())
     {
-        emit pipelineFailed();
+        emit pipelineFailed(QString::fromStdString(pipeline->lastError()));
         return;
     }
     {
@@ -215,25 +245,19 @@ void WasapiAudioService::restartPipeline(const QString& deviceId)
                                      float* left_out, float* right_out, size_t frames) {
         processAudio(left_in, right_in, left_out, right_out, frames);
     });
-    activeOutputDeviceId = deviceId;
-    reportOutputDevice(deviceId);
+    saveResolvedSelection();
+    reportOutputDevice(activeOutputDeviceId);
 }
 
 void WasapiAudioService::reportOutputDevice(const QString& deviceId)
 {
     if (deviceId.isEmpty() || deviceId != activeOutputDeviceId)
         return;
-    for (const auto& device : pipeline->enumerateOutputDevices())
-    {
-        if (QString::fromStdString(device.id) == deviceId)
-        {
-            // A WASAPI render endpoint is itself the selected hardware output route.
-            emit outputDeviceChanged(QString::fromStdString(device.name),
-                                     QString::fromStdString(device.id),
-                                     QString::fromStdString(device.id));
-            return;
-        }
-    }
+    const auto& device = pipeline->resolvedOutputDevice();
+    if (QString::fromStdString(device.id) != deviceId)
+        return;
+    // A WASAPI render endpoint is itself the selected hardware output route.
+    emit outputDeviceChanged(QString::fromStdString(device.name), deviceId, deviceId);
 }
 
 DspHost* WasapiAudioService::host()

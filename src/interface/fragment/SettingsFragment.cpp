@@ -26,6 +26,7 @@
 #include <QTimer>
 #include <QUrl>
 #include <QScrollArea>
+#include <QScopedValueRollback>
 #include <QVBoxLayout>
 using namespace std;
 
@@ -67,7 +68,13 @@ SettingsFragment::SettingsFragment(TrayIcon *trayIcon,
     auto* deviceLayout = new QVBoxLayout(ui->devices);
     deviceLayout->setContentsMargins(0, 0, 0, 0);
     deviceLayout->addWidget(deviceScroll);
-    ui->devices_group->setTitle(tr("JamesDSP output device"));
+    ui->devices_group->setTitle(tr("JamesDSP physical output device"));
+    ui->label_12->setText(tr("Output"));
+    ui->dev_select->setMaximumWidth(QWIDGETSIZE_MAX);
+    ui->dev_select->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    ui->dev_select->setMinimumContentsLength(24);
+    ui->dev_input_select->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    ui->dev_input_select->setMinimumContentsLength(24);
     connect(ui->windowsSoundSettings, &QPushButton::clicked, this, [this] {
         if (!DesktopServices::openUrl("ms-settings:sound", this))
         {
@@ -76,6 +83,7 @@ SettingsFragment::SettingsFragment(TrayIcon *trayIcon,
         }
     });
 #else
+    ui->windowsInputGroup->hide();
     ui->windowsRoutingBox->hide();
 #endif
 
@@ -154,6 +162,9 @@ SettingsFragment::SettingsFragment(TrayIcon *trayIcon,
     connect(ui->dev_mode_auto, &QRadioButton::clicked, this, &SettingsFragment::onDefaultDeviceSelected);
     connect(ui->dev_mode_manual, &QRadioButton::clicked, this, &SettingsFragment::onDefaultDeviceSelected);
     connect(ui->dev_select, qOverload<int>(&QComboBox::currentIndexChanged), this, &SettingsFragment::onDefaultDeviceSelected);
+#ifdef _WIN32
+    connect(ui->dev_input_select, qOverload<int>(&QComboBox::currentIndexChanged), this, &SettingsFragment::onInputDeviceSelected);
+#endif
 
 	/*
      * Global signals
@@ -200,6 +211,16 @@ void SettingsFragment::onAppConfigUpdated(const AppConfig::Key &key, const QVari
     {
         case AppConfig::AutoStartEnabled:
             ui->systray_minOnBoot->setChecked(value.toBool());
+            break;
+#ifdef _WIN32
+        case AppConfig::AudioInputDevice:
+        case AppConfig::AudioInputDeviceName:
+        case AppConfig::AudioOutputDevice:
+        case AppConfig::AudioOutputDeviceName:
+            if (!_lockslot)
+                refreshDevices();
+            break;
+#endif
         default:
             break;
         }
@@ -212,17 +233,47 @@ void SettingsFragment::updateBenchmarkStatus(const QString &message)
 
 void SettingsFragment::refreshDevices()
 {
-    _lockslot = true;
-	ui->dev_select->clear();
+    QScopedValueRollback<bool> lock(_lockslot, true);
 
 #ifdef _WIN32
+    const auto devices = _audioService->sinkDevices();
+    auto populate = [&devices](QComboBox* selector, AppConfig::Key idKey, AppConfig::Key nameKey) {
+        selector->clear();
+        selector->addItem(tr("Select a playback endpoint..."), QString());
+        selector->setItemData(0, QString(), Qt::UserRole + 1);
+        for (const auto& device : devices)
+        {
+            const auto id = QString::fromStdString(device.name);
+            const auto name = QString::fromStdString(device.description);
+            selector->addItem(QString("%1 (%2)").arg(name, id), id);
+            const int index = selector->count() - 1;
+            selector->setItemData(index, name, Qt::UserRole + 1);
+            selector->setItemData(index, id, Qt::ToolTipRole);
+        }
+
+        const auto current = AppConfig::instance().get<QString>(idKey);
+        int index = selector->findData(current);
+        if (index < 0)
+        {
+            const auto name = AppConfig::instance().get<QString>(nameKey);
+            selector->addItem(name.isEmpty() ? tr("Unavailable (%1)").arg(current)
+                                            : tr("Unavailable: %1 (%2)").arg(name, current), current);
+            index = selector->count() - 1;
+            selector->setItemData(index, name, Qt::UserRole + 1);
+            selector->setItemData(index, current, Qt::ToolTipRole);
+        }
+        selector->setCurrentIndex(index);
+    };
+
     ui->dev_mode_manual->setChecked(true);
     ui->dev_select->setEnabled(true);
+    populate(ui->dev_input_select, AppConfig::AudioInputDevice, AppConfig::AudioInputDeviceName);
+    populate(ui->dev_select, AppConfig::AudioOutputDevice, AppConfig::AudioOutputDeviceName);
 #else
+    ui->dev_select->clear();
     ui->dev_mode_auto->setChecked(AppConfig::instance().get<bool>(AppConfig::AudioOutputUseDefault));
     ui->dev_mode_manual->setChecked(!AppConfig::instance().get<bool>(AppConfig::AudioOutputUseDefault));
     ui->dev_select->setDisabled(ui->dev_mode_auto->isChecked());
-#endif
 
     auto devices = _audioService->sinkDevices();
 
@@ -254,7 +305,7 @@ void SettingsFragment::refreshDevices()
         ui->dev_select->addItem(name, current);
         ui->dev_select->setCurrentText(name);
     }
-    _lockslot = false;
+#endif
 }
 
 void SettingsFragment::refreshAll()
@@ -352,6 +403,17 @@ void SettingsFragment::onDefaultDeviceSelected()
         return;
     }
 
+#ifdef _WIN32
+    const auto id = ui->dev_select->currentData().toString();
+    const auto name = ui->dev_select->currentData(Qt::UserRole + 1).toString();
+    {
+        QScopedValueRollback<bool> lock(_lockslot, true);
+        // Metadata must be persisted before the ID notification restarts WASAPI.
+        AppConfig::instance().set(AppConfig::AudioOutputDeviceName, name);
+        AppConfig::instance().set(AppConfig::AudioOutputDevice, id);
+    }
+    refreshDevices();
+#else
     ui->dev_select->setDisabled(ui->dev_mode_auto->isChecked());
     AppConfig::instance().set(AppConfig::AudioOutputUseDefault, ui->dev_mode_auto->isChecked());
 
@@ -364,7 +426,26 @@ void SettingsFragment::onDefaultDeviceSelected()
 
         AppConfig::instance().set(AppConfig::AudioOutputDevice, ui->dev_select->currentData());
     }
+#endif
 }
+
+#ifdef _WIN32
+void SettingsFragment::onInputDeviceSelected()
+{
+    if (_lockslot)
+        return;
+
+    const auto id = ui->dev_input_select->currentData().toString();
+    const auto name = ui->dev_input_select->currentData(Qt::UserRole + 1).toString();
+    {
+        QScopedValueRollback<bool> lock(_lockslot, true);
+        // Metadata must be persisted before the ID notification restarts WASAPI.
+        AppConfig::instance().set(AppConfig::AudioInputDeviceName, name);
+        AppConfig::instance().set(AppConfig::AudioInputDevice, id);
+    }
+    refreshDevices();
+}
+#endif
 
 void SettingsFragment::onTreeItemSelected(QTreeWidgetItem *cur, QTreeWidgetItem *prev)
 {

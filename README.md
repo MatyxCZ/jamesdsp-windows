@@ -129,16 +129,32 @@ integration belonging to a different copy.
 
 ### Windows audio routing
 
-This experimental port captures the Windows default playback endpoint through
-WASAPI loopback and sends processed audio to a **different** output endpoint.
-With VB-Cable installed:
+This experimental port captures a **saved playback endpoint** through WASAPI
+loopback and sends processed audio to a **different saved output endpoint**.
+Neither selection follows changes to Windows' default device. With VB-Cable:
 
-1. Set Windows default playback to **CABLE Input (VB-Audio Virtual Cable)**.
-2. In JamesDSP **Settings → Devices**, manually select physical headphones or
-   speakers as the output. Do not select the cable as JamesDSP's output.
-3. After routing or device-format changes, use **Relink audio pipeline** in the
-   main window's three-dot menu. The Devices page includes routing help and a
-   shortcut to Windows sound settings.
+1. In JamesDSP **Settings → Devices**, select **CABLE Input (VB-Audio Virtual
+   Cable)** as the virtual input. This is a playback endpoint, **not** the
+   recording endpoint named CABLE Output.
+2. Select physical headphones or speakers as JamesDSP's output, never the same
+   endpoint as its input.
+3. Route Windows default playback, or the specific apps you want processed,
+   into **CABLE Input** in Windows sound settings. Apps playing to other endpoints
+   bypass JamesDSP. JamesDSP does not change Windows defaults automatically.
+4. After device-format changes, use **Relink audio pipeline** in the main
+   window's three-dot menu. The Devices page includes routing help, device refresh,
+   and a shortcut to Windows sound settings.
+
+Both selections save their endpoint ID and exact friendly name. If Windows
+recreates an endpoint with a new ID, JamesDSP reconnects only when exactly one
+active endpoint has the saved name, then saves the recovered ID. A surviving
+saved ID takes precedence over names. Missing devices and ambiguous names produce
+a specific error; JamesDSP never guesses a different output or enables feedback.
+If the device was renamed too, select it again manually.
+
+**Upgrading from v0.2.0 or earlier:** select the virtual input once. Existing
+output IDs remain usable, but if the old output already vanished before its name
+was saved, select that output again too. Effects, presets, and assets are retained.
 
 Matching cable and headphone sample rates has helped in user testing, including
 192000 Hz when supported by both devices. This is a workaround, not an established
@@ -155,10 +171,10 @@ avoid IIR-tail slowdowns during silence, restoring its previous policy on exit.
 These changes do not guarantee glitch-free playback under sustained DSP overload
 or independently clocked endpoints; loading a preset can still stall processing.
 
-Windows captures the **whole default playback mix**. The Apps list is informational;
-per-app blocklisting/allowlisting and automatic output selection are not supported.
-Choose a physical output explicitly. Invalid/same-endpoint routing is rejected
-and reported in the GUI rather than enabling a feedback loop.
+Windows captures the **whole selected playback-endpoint mix**. The Apps list is
+informational; per-app blocklisting/allowlisting and automatic output selection
+are not supported. Choose both endpoints explicitly. Invalid/same-endpoint routing
+is rejected and reported with its cause in the GUI rather than enabling feedback.
 
 Known limits: independently clocked endpoints can drift; sustained DSP overload,
 preset loading, disconnects, or sample-rate changes can interrupt playback.
@@ -186,6 +202,10 @@ can override the default sibling `build` and `dist` folders. `QTDIR` or
 `QT_ROOT_DIR` can supply the Qt path. Packaging starts in an empty staging folder,
 not an existing build/runtime folder, and ships runtime files and license notices
 only. The `windows` branch has a Windows build/artifact workflow.
+The Windows workflow also runs the standalone saved-device selection regression:
+exact-ID precedence, stale-ID recovery, missing endpoints, ambiguous names, and
+byte-exact Unicode device metadata.
+
 
 Each release also provides `JamesDSP-windows-source.zip`: the committed application
 plus **all recursively pinned submodule sources** and `SOURCE_REVISION.txt`.

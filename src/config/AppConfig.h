@@ -61,7 +61,10 @@ public:
         AutoStartEnabled,
 
         AudioOutputUseDefault,
+        AudioInputDevice,
+        AudioInputDeviceName,
         AudioOutputDevice,
+        AudioOutputDeviceName,
         AudioAppBlocklist,
         AudioAppBlocklistInvert,
         AudioInactivityTimeout,

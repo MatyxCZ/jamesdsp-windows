@@ -4,11 +4,46 @@
 #include <atomic>
 #include <cstring>
 #include <algorithm>
+#include <cstdio>
+#include <system_error>
 #include <functiondiscoverykeys_devpkey.h>
 #include <xmmintrin.h>
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "oleaut32.lib")
+
+namespace {
+struct ReleaseCom {
+    template <typename T> void operator()(T* object) const { object->Release(); }
+};
+template <typename T> using ScopedCom = std::unique_ptr<T, ReleaseCom>;
+
+std::string utf8(const wchar_t* text)
+{
+    if (!text)
+        return {};
+    const int length = WideCharToMultiByte(CP_UTF8, 0, text, -1, nullptr, 0, nullptr, nullptr);
+    if (length <= 0)
+        return {};
+    std::string result(static_cast<size_t>(length), '\0');
+    if (!WideCharToMultiByte(CP_UTF8, 0, text, -1, &result[0], length, nullptr, nullptr))
+        return {};
+    result.pop_back();
+    return result;
+}
+
+std::string hresultDetail(HRESULT hr)
+{
+    char hex[11] = {};
+    std::snprintf(hex, sizeof(hex), "0x%08lX", static_cast<unsigned long>(hr));
+    return " (HRESULT " + std::string(hex) + ", " + std::to_string(hr) + ")";
+}
+
+std::string endpointContext(const char* role, const wasapi::DeviceInfo& device)
+{
+    return std::string(role) + " endpoint '" + device.name + "' [ID: " + device.id + "]";
+}
+}
 
 WasapiPipelineManager::WasapiPipelineManager()
 {
@@ -19,60 +54,135 @@ WasapiPipelineManager::~WasapiPipelineManager()
     shutdown();
 }
 
+bool WasapiPipelineManager::setError(const std::string& detail)
+{
+    errorDetail = detail;
+    util::error(detail);
+    return false;
+}
+
+bool WasapiPipelineManager::ensureDeviceEnumerator()
+{
+    if (deviceEnumerator)
+        return true;
+    const HRESULT comHr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    comInitialized = SUCCEEDED(comHr);
+    if (FAILED(comHr) && comHr != RPC_E_CHANGED_MODE)
+        return setError("Cannot initialize COM for WASAPI device enumeration" + hresultDetail(comHr));
+
+    const HRESULT hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL,
+                                        __uuidof(IMMDeviceEnumerator),
+                                        reinterpret_cast<void**>(&deviceEnumerator));
+    if (FAILED(hr) || !deviceEnumerator) {
+        if (deviceEnumerator) {
+            deviceEnumerator->Release();
+            deviceEnumerator = nullptr;
+        }
+        if (comInitialized) {
+            CoUninitialize();
+            comInitialized = false;
+        }
+        return setError("Cannot create the WASAPI device enumerator" +
+                        hresultDetail(FAILED(hr) ? hr : E_POINTER));
+    }
+    return true;
+}
+
+bool WasapiPipelineManager::openSelectedDevice(const DeviceInfo& selected, const char* role,
+                                              IMMDevice** device)
+{
+    const auto context = endpointContext(role, selected);
+    const int length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                                           selected.id.c_str(), -1, nullptr, 0);
+    if (length <= 0)
+        return setError("Invalid saved ID for " + context + hresultDetail(HRESULT_FROM_WIN32(GetLastError())));
+    std::wstring id(static_cast<size_t>(length), L'\0');
+    if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, selected.id.c_str(), -1, &id[0], length))
+        return setError("Cannot decode saved ID for " + context + hresultDetail(HRESULT_FROM_WIN32(GetLastError())));
+    HRESULT hr = deviceEnumerator->GetDevice(id.c_str(), device);
+    if (FAILED(hr) || !*device)
+        return setError("Cannot open " + context + hresultDetail(FAILED(hr) ? hr : E_POINTER) +
+                        ". Reconnect it or select the endpoint again in Audio settings.");
+    DWORD state = 0;
+    hr = (*device)->GetState(&state);
+    if (FAILED(hr))
+        return setError("Cannot query the state of " + context + hresultDetail(hr));
+    if (!(state & DEVICE_STATE_ACTIVE))
+        return setError("The selected " + context + " is not active. Reconnect or enable it, then relink.");
+    return true;
+}
+
 bool WasapiPipelineManager::initialize()
 {
-    HRESULT hr;
+    // Failed starts and previous runs must release every client before reuse.
+    shutdown();
+    errorDetail.clear();
+    if (!initializeEndpoints()) {
+        shutdown();
+        return false;
+    }
+    return true;
+}
 
-    // Initialize COM
-    hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-    comInitialized = SUCCEEDED(hr);
-    if (FAILED(hr))
-    {
-        if (hr != RPC_E_CHANGED_MODE)
-        {
-            util::error("CoInitializeEx failed: " + std::to_string(hr));
-            return false;
+bool WasapiPipelineManager::initializeEndpoints()
+{
+    if (!ensureDeviceEnumerator())
+        return false;
+
+    std::vector<DeviceInfo> devices;
+    if (!collectActiveDevices(devices))
+        return false;
+    const auto input = wasapi::resolveDeviceSelection(devices, savedInput.id, savedInput.name);
+    const auto output = wasapi::resolveDeviceSelection(devices, savedOutput.id, savedOutput.name);
+    const auto selectionError = [this](const wasapi::DeviceSelection& selection,
+                                       const DeviceInfo& saved, const char* role) {
+        switch (selection.status) {
+        case wasapi::SelectionStatus::Empty:
+            return setError("No explicit " + std::string(role) + " endpoint is saved. Select CABLE Input "
+                            "(a playback endpoint) as the loopback input and a different physical output "
+                            "in Audio settings. Windows default devices are not used.");
+        case wasapi::SelectionStatus::Ambiguous:
+            return setError("The saved " + endpointContext(role, saved) +
+                            " is unavailable and multiple active endpoints have its exact friendly name. "
+                            "Select the intended endpoint explicitly in Audio settings.");
+        case wasapi::SelectionStatus::Unavailable:
+            return setError("The saved " + endpointContext(role, saved) +
+                            " is unavailable; no unique active endpoint with its saved friendly name exists. "
+                            "Reconnect or enable it, or select it again in Audio settings.");
+        case wasapi::SelectionStatus::Resolved:
+            return true;
         }
-    }
-
-    // Create device enumerator
-    hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL,
-                          __uuidof(IMMDeviceEnumerator),
-                          reinterpret_cast<void**>(&deviceEnumerator));
-    if (FAILED(hr))
-    {
-        util::error("Failed to create device enumerator: " + std::to_string(hr));
         return false;
-    }
-
-    // Get default render device (we capture from this via loopback)
-    hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &captureDevice);
-    if (FAILED(hr) || !captureDevice)
-    {
-        util::error("Failed to get default render device: " + std::to_string(hr));
+    };
+    if (!selectionError(input, savedInput, "loopback input") ||
+        !selectionError(output, savedOutput, "render output"))
         return false;
-    }
+    const DeviceInfo& selectedInput = *input.device;
+    const DeviceInfo& selectedOutput = *output.device;
+    if (selectedInput.id == selectedOutput.id)
+        return setError("Feedback prevented: " + endpointContext("loopback input", selectedInput) +
+                        " is also the render output. Select CABLE Input as input and a different physical "
+                        "output in Audio settings. Windows defaults were not changed.");
+    if (!openSelectedDevice(selectedInput, "loopback input", &captureDevice) ||
+        !openSelectedDevice(selectedOutput, "render output", &renderDevice))
+        return false;
 
-
-    // Create capture client (loopback on render device)
-    hr = captureDevice->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr,
-                                 reinterpret_cast<void**>(&captureClient));
+    const std::string inputContext = endpointContext("loopback input", selectedInput);
+    const std::string outputContext = endpointContext("render output", selectedOutput);
+    HRESULT hr = captureDevice->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr,
+                                         reinterpret_cast<void**>(&captureClient));
     if (FAILED(hr) || !captureClient)
-    {
-        util::error("Failed to activate capture IAudioClient: " + std::to_string(hr));
-        return false;
-    }
+        return setError("Cannot activate " + inputContext + hresultDetail(FAILED(hr) ? hr : E_POINTER));
 
-    // Get the mix format (device's native format)
     WAVEFORMATEX* mixFormat = nullptr;
     hr = captureClient->GetMixFormat(&mixFormat);
-    if (FAILED(hr) || !mixFormat)
-    {
-        util::error("Failed to get mix format: " + std::to_string(hr));
-        return false;
+    if (FAILED(hr) || !mixFormat) {
+        CoTaskMemFree(mixFormat);
+        return setError("Cannot get the mix format for " + inputContext +
+                        hresultDetail(FAILED(hr) ? hr : E_POINTER));
     }
-
     sampleRate = mixFormat->nSamplesPerSec;
+    CoTaskMemFree(mixFormat);
     WAVEFORMATEX streamFormat = {};
     streamFormat.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
     streamFormat.nChannels = 2;
@@ -81,163 +191,75 @@ bool WasapiPipelineManager::initialize()
     streamFormat.nBlockAlign = 2 * sizeof(float);
     streamFormat.nAvgBytesPerSec = streamFormat.nSamplesPerSec * streamFormat.nBlockAlign;
 
-    // Initialize capture client in loopback mode (shared)
-    REFERENCE_TIME hnsRequestedDuration = 0;
     hr = captureClient->Initialize(AUDCLNT_SHAREMODE_SHARED,
                                    AUDCLNT_STREAMFLAGS_LOOPBACK |
                                    AUDCLNT_STREAMFLAGS_NOPERSIST |
                                    AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM |
                                    AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY,
-                                   hnsRequestedDuration,
-                                   0,
-                                   &streamFormat,
-                                   nullptr);
-    CoTaskMemFree(mixFormat);
-
+                                   0, 0, &streamFormat, nullptr);
     if (FAILED(hr))
-    {
-        util::error("Failed to initialize capture client: " + std::to_string(hr));
-        return false;
-    }
-
-    // Get the capture interface
+        return setError("Cannot initialize " + inputContext + hresultDetail(hr));
     hr = captureClient->GetService(__uuidof(IAudioCaptureClient),
                                    reinterpret_cast<void**>(&capture));
     if (FAILED(hr) || !capture)
-    {
-        util::error("Failed to get IAudioCaptureClient: " + std::to_string(hr));
-        return false;
-    }
-
-    // Render to a separate endpoint. Loopback capture and render on the same
-    // endpoint creates an audio feedback loop and leaves the source audible.
-    if (currentDeviceId.empty())
-    {
-        IMMDevice* defaultRender = nullptr;
-        hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultRender);
-        if (SUCCEEDED(hr) && defaultRender)
-        {
-            LPWSTR defaultId = nullptr;
-            if (SUCCEEDED(defaultRender->GetId(&defaultId)) && defaultId)
-            {
-                int length = WideCharToMultiByte(CP_UTF8, 0, defaultId, -1, nullptr, 0, nullptr, nullptr);
-                if (length > 0)
-                {
-                    std::string id(static_cast<size_t>(length), '\0');
-                    WideCharToMultiByte(CP_UTF8, 0, defaultId, -1, id.data(), length, nullptr, nullptr);
-                    currentDeviceId = id.c_str();
-                }
-                CoTaskMemFree(defaultId);
-            }
-            defaultRender->Release();
-        }
-    }
-
-    int wideLength = MultiByteToWideChar(CP_UTF8, 0, currentDeviceId.c_str(), -1, nullptr, 0);
-    std::wstring outputDeviceId(static_cast<size_t>(wideLength), L'\0');
-    MultiByteToWideChar(CP_UTF8, 0, currentDeviceId.c_str(), -1,
-                        outputDeviceId.data(), wideLength);
-    hr = deviceEnumerator->GetDevice(outputDeviceId.c_str(), &renderDevice);
-    if (FAILED(hr) || !renderDevice)
-    {
-        util::error("Selected WASAPI render device could not be opened: " + std::to_string(hr));
-        return false;
-    }
-
-    LPWSTR captureId = nullptr;
-    LPWSTR renderId = nullptr;
-    const bool sameEndpoint =
-        SUCCEEDED(captureDevice->GetId(&captureId)) &&
-        SUCCEEDED(renderDevice->GetId(&renderId)) &&
-        wcscmp(captureId, renderId) == 0;
-    CoTaskMemFree(captureId);
-    CoTaskMemFree(renderId);
-    if (sameEndpoint)
-    {
-        util::error("WASAPI loopback capture and render endpoints must be different. "
-                    "Route Windows audio to a virtual cable and choose physical output here.");
-        return false;
-    }
-
-    // The render endpoint has its own reference from IMMDeviceEnumerator::GetDevice.
+        return setError("Cannot get the capture interface for " + inputContext +
+                        hresultDetail(FAILED(hr) ? hr : E_POINTER));
 
     hr = renderDevice->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr,
                                 reinterpret_cast<void**>(&renderClient));
     if (FAILED(hr) || !renderClient)
-    {
-        util::error("Failed to activate render IAudioClient: " + std::to_string(hr));
-        return false;
-    }
-
-    // Both clients expose stereo float at the capture rate; WASAPI converts
-    // the render stream to the physical endpoint's native rate and layout.
+        return setError("Cannot activate " + outputContext + hresultDetail(FAILED(hr) ? hr : E_POINTER));
+    // Both streams remain stereo float at the input rate; WASAPI converts output.
     hr = renderClient->Initialize(AUDCLNT_SHAREMODE_SHARED,
                                   AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM |
                                   AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY,
-                                  0,
-                                  0,
-                                  &streamFormat,
-                                  nullptr);
-
+                                  0, 0, &streamFormat, nullptr);
     if (FAILED(hr))
-    {
-        util::error("Failed to initialize render client: " + std::to_string(hr));
-        return false;
-    }
-
-    // Get the render interface
+        return setError("Cannot initialize " + outputContext + hresultDetail(hr));
     hr = renderClient->GetService(__uuidof(IAudioRenderClient),
                                   reinterpret_cast<void**>(&render));
     if (FAILED(hr) || !render)
-    {
-        util::error("Failed to get IAudioRenderClient: " + std::to_string(hr));
-        return false;
-    }
+        return setError("Cannot get the render interface for " + outputContext +
+                        hresultDetail(FAILED(hr) ? hr : E_POINTER));
 
-    // Get buffer sizes
     UINT32 captureBufferSize = 0;
-    captureClient->GetBufferSize(&captureBufferSize);
+    hr = captureClient->GetBufferSize(&captureBufferSize);
+    if (FAILED(hr) || captureBufferSize == 0)
+        return setError("Cannot get a usable buffer for " + inputContext +
+                        hresultDetail(FAILED(hr) ? hr : E_UNEXPECTED));
     UINT32 renderBufferSize = 0;
-    renderClient->GetBufferSize(&renderBufferSize);
+    hr = renderClient->GetBufferSize(&renderBufferSize);
+    if (FAILED(hr) || renderBufferSize == 0)
+        return setError("Cannot get a usable buffer for " + outputContext +
+                        hresultDetail(FAILED(hr) ? hr : E_UNEXPECTED));
 
-    util::debug("WASAPI initialized: sample rate=" + std::to_string(sampleRate) +
-                ", capture buffer=" + std::to_string(captureBufferSize) +
-                ", render buffer=" + std::to_string(renderBufferSize));
-
-    // Fill the render buffer with silence initially to prevent pops
     BYTE* silenceBytes = nullptr;
-    UINT32 padding = 0;
     hr = render->GetBuffer(renderBufferSize, &silenceBytes);
-    if (SUCCEEDED(hr) && silenceBytes)
-    {
-        memset(silenceBytes, 0, renderBufferSize * sizeof(float) * 2);
-        render->ReleaseBuffer(renderBufferSize, 0);
-    }
-
-    // Start capture
+    if (FAILED(hr))
+        return setError("Cannot prime the buffer for " + outputContext + hresultDetail(hr));
+    hr = render->ReleaseBuffer(renderBufferSize, AUDCLNT_BUFFERFLAGS_SILENT);
+    if (FAILED(hr))
+        return setError("Cannot release the initial buffer for " + outputContext + hresultDetail(hr));
     hr = captureClient->Start();
     if (FAILED(hr))
-    {
-        util::error("Failed to start capture client: " + std::to_string(hr));
-        return false;
-    }
-
-    // Start render
+        return setError("Cannot start " + inputContext + hresultDetail(hr));
     hr = renderClient->Start();
     if (FAILED(hr))
-    {
-        util::error("Failed to start render client: " + std::to_string(hr));
-        captureClient->Stop();
-        return false;
-    }
+        return setError("Cannot start " + outputContext + hresultDetail(hr));
 
-    // Set high timer resolution for lower latency
     timerPeriodActive = timeBeginPeriod(1) == TIMERR_NOERROR;
-
-    // Start processing thread
     running = true;
-    audioThread = std::thread(&WasapiPipelineManager::processingLoop, this);
-
+    try {
+        audioThread = std::thread(&WasapiPipelineManager::processingLoop, this);
+    } catch (const std::system_error& error) {
+        return setError("Cannot start the WASAPI processing worker: " + std::string(error.what()));
+    }
+    activeInput = selectedInput;
+    activeOutput = selectedOutput;
+    util::debug("WASAPI initialized: " + inputContext + " -> " + outputContext +
+                ", sample rate=" + std::to_string(sampleRate) +
+                ", capture buffer=" + std::to_string(captureBufferSize) +
+                ", render buffer=" + std::to_string(renderBufferSize));
     return true;
 }
 
@@ -246,6 +268,8 @@ void WasapiPipelineManager::shutdown()
     running = false;
     if (audioThread.joinable())
         audioThread.join();
+    activeInput = {};
+    activeOutput = {};
 
     if (timerPeriodActive) {
         timeEndPeriod(1);
@@ -441,98 +465,81 @@ void WasapiPipelineManager::processingLoop()
     util::debug("WASAPI processing thread exited");
 }
 
-std::vector<WasapiPipelineManager::DeviceInfo> WasapiPipelineManager::enumerateOutputDevices() const
+bool WasapiPipelineManager::collectActiveDevices(std::vector<DeviceInfo>& devices)
 {
-    std::vector<DeviceInfo> devices;
-
-    if (!deviceEnumerator)
-        return devices;
-
-    IMMDeviceCollection* deviceCollection = nullptr;
-    HRESULT hr = deviceEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &deviceCollection);
-    if (FAILED(hr) || !deviceCollection)
-        return devices;
-
+    IMMDeviceCollection* rawCollection = nullptr;
+    HRESULT hr = deviceEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &rawCollection);
+    ScopedCom<IMMDeviceCollection> collection(rawCollection);
+    if (FAILED(hr) || !collection)
+        return setError("Cannot enumerate active WASAPI playback endpoints" +
+                        hresultDetail(FAILED(hr) ? hr : E_POINTER));
     UINT count = 0;
-    deviceCollection->GetCount(&count);
+    hr = collection->GetCount(&count);
+    if (FAILED(hr))
+        return setError("Cannot count active WASAPI playback endpoints" + hresultDetail(hr));
+    devices.reserve(count);
 
-    for (UINT i = 0; i < count; i++)
-    {
-        IMMDevice* device = nullptr;
-        hr = deviceCollection->Item(i, &device);
-        if (FAILED(hr) || !device)
-            continue;
-
-        DeviceInfo info;
-
-        // Get device ID
+    std::string defaultId;
+    IMMDevice* rawDefault = nullptr;
+    hr = deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &rawDefault);
+    ScopedCom<IMMDevice> defaultDevice(rawDefault);
+    if (SUCCEEDED(hr) && defaultDevice) {
         LPWSTR id = nullptr;
-        if (SUCCEEDED(device->GetId(&id)))
-        {
-            int len = WideCharToMultiByte(CP_UTF8, 0, id, -1, nullptr, 0, nullptr, nullptr);
-            if (len > 0)
-            {
-                char buffer[512];
-                WideCharToMultiByte(CP_UTF8, 0, id, -1, buffer, sizeof(buffer), nullptr, nullptr);
-                info.id = buffer;
-            }
-            CoTaskMemFree(id);
-        }
-
-        // Get friendly name
-        IPropertyStore* props = nullptr;
-        if (SUCCEEDED(device->OpenPropertyStore(STGM_READ, &props)))
-        {
-            PROPVARIANT nameVar;
-            PropVariantInit(&nameVar);
-            if (SUCCEEDED(props->GetValue(PKEY_Device_FriendlyName, &nameVar)))
-            {
-                if (nameVar.vt == VT_LPWSTR)
-                {
-                    int len = WideCharToMultiByte(CP_UTF8, 0, nameVar.pwszVal, -1, nullptr, 0, nullptr, nullptr);
-                    if (len > 0)
-                    {
-                        char buffer[512];
-                        WideCharToMultiByte(CP_UTF8, 0, nameVar.pwszVal, -1, buffer, sizeof(buffer), nullptr, nullptr);
-                        info.name = buffer;
-                    }
-                }
-            }
-            PropVariantClear(&nameVar);
-            props->Release();
-        }
-
-        // Check if this is the default device
-        IMMDevice* defaultDev = nullptr;
-        if (SUCCEEDED(deviceEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &defaultDev)))
-        {
-            LPWSTR defaultId = nullptr;
-            if (SUCCEEDED(defaultDev->GetId(&defaultId)))
-            {
-                // Convert defaultId to string for comparison (id was already freed)
-                int dlen = WideCharToMultiByte(CP_UTF8, 0, defaultId, -1, nullptr, 0, nullptr, nullptr);
-                if (dlen > 0)
-                {
-                    char dbuffer[512];
-                    WideCharToMultiByte(CP_UTF8, 0, defaultId, -1, dbuffer, sizeof(dbuffer), nullptr, nullptr);
-                    info.isDefault = (info.id == dbuffer);
-                }
-                CoTaskMemFree(defaultId);
-            }
-            defaultDev->Release();
-        }
-
-        devices.push_back(info);
-        device->Release();
+        if (SUCCEEDED(defaultDevice->GetId(&id)))
+            defaultId = utf8(id);
+        CoTaskMemFree(id);
     }
 
-    deviceCollection->Release();
+    for (UINT i = 0; i < count; ++i) {
+        IMMDevice* rawDevice = nullptr;
+        hr = collection->Item(i, &rawDevice);
+        ScopedCom<IMMDevice> device(rawDevice);
+        if (FAILED(hr) || !device)
+            return setError("Cannot read active WASAPI playback endpoint " + std::to_string(i) +
+                            hresultDetail(FAILED(hr) ? hr : E_POINTER));
+        DeviceInfo info;
+        LPWSTR id = nullptr;
+        hr = device->GetId(&id);
+        if (SUCCEEDED(hr))
+            info.id = utf8(id);
+        CoTaskMemFree(id);
+        if (FAILED(hr) || info.id.empty())
+            return setError("Cannot read the ID of active WASAPI playback endpoint " + std::to_string(i) +
+                            hresultDetail(FAILED(hr) ? hr : E_UNEXPECTED));
+        IPropertyStore* rawProperties = nullptr;
+        hr = device->OpenPropertyStore(STGM_READ, &rawProperties);
+        ScopedCom<IPropertyStore> properties(rawProperties);
+        if (FAILED(hr) || !properties)
+            return setError("Cannot read properties for playback endpoint [ID: " + info.id + "]" +
+                            hresultDetail(FAILED(hr) ? hr : E_POINTER));
+        PROPVARIANT name;
+        PropVariantInit(&name);
+        hr = properties->GetValue(PKEY_Device_FriendlyName, &name);
+        if (SUCCEEDED(hr) && name.vt == VT_LPWSTR)
+            info.name = utf8(name.pwszVal);
+        PropVariantClear(&name);
+        if (FAILED(hr) || info.name.empty())
+            return setError("Cannot read the friendly name of playback endpoint [ID: " + info.id + "]" +
+                            hresultDetail(FAILED(hr) ? hr : E_UNEXPECTED));
+        info.isDefault = info.id == defaultId;
+        devices.push_back(std::move(info));
+    }
+    return true;
+}
+
+std::vector<WasapiPipelineManager::DeviceInfo> WasapiPipelineManager::enumerateOutputDevices()
+{
+    std::vector<DeviceInfo> devices;
+    if (!ensureDeviceEnumerator() || !collectActiveDevices(devices))
+        devices.clear();
     return devices;
 }
 
-bool WasapiPipelineManager::setActiveDevice(const std::string& deviceId)
+void WasapiPipelineManager::setDeviceSelection(const std::string& inputId, const std::string& inputName,
+                                              const std::string& outputId, const std::string& outputName)
 {
-    shutdown();
-    currentDeviceId = deviceId;
-    return initialize();
+    savedInput.id = inputId;
+    savedInput.name = inputName;
+    savedOutput.id = outputId;
+    savedOutput.name = outputName;
 }

@@ -39,11 +39,13 @@ public slots:
     WasapiPipelineManager* pipelineManager() { return pipeline.get(); }
 
 signals:
-    void pipelineFailed();
+    void pipelineFailed(const QString& detail);
 
 private:
     void setupDsp();
-    void restartPipeline(const QString& deviceId);
+    void configurePipelineSelection();
+    void saveResolvedSelection();
+    void restartPipeline();
     void reportOutputDevice(const QString& deviceId);
     void processAudio(float* left_in, float* right_in,
                       float* left_out, float* right_out, size_t frames);
@@ -65,6 +67,7 @@ private:
     uint32_t sampleRate = 48000;
     bool comInitialized = false;
     bool bypass = false;
+    bool savingResolvedSelection = false;
 };
 
 #endif // WASAPIAUDIOSERVICE_H

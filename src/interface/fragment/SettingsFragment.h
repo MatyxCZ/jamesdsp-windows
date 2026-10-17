@@ -55,6 +55,9 @@ private slots:
     void onSavePathsClicked();
     void onExtractAssetsClicked();
     void onDefaultDeviceSelected();
+#ifdef _WIN32
+    void onInputDeviceSelected();
+#endif
     void onTreeItemSelected(QTreeWidgetItem *cur, QTreeWidgetItem* prev);
     void onAutoStartToggled();
     void onSystrayToggled();
