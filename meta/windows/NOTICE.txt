@@ -43,10 +43,17 @@ text permits selection of a GPL version where the program specifies none;
 the combined application uses GPLv3. Original component notices are retained.
 
 This is an experimental Windows proof of concept, not a stable audio driver.
-With VB-Cable installed separately, set Windows default playback to CABLE
-Input and select DIFFERENT physical headphones/speakers in Settings > Devices.
-Relink through the three-dot menu after routing/rate changes. Windows captures
-the entire playback mix; per-app exclusion is unsupported. Matching endpoint
+With VB-Cable installed separately, select its CABLE Input PLAYBACK endpoint
+as the virtual input in Settings > Devices, then select DIFFERENT physical
+headphones/speakers as the output. Route Windows playback or desired apps into
+CABLE Input. Neither saved selection follows Windows default-device changes.
+On upgrade from v0.2.0 or earlier, select the virtual input once. Reselect an
+already-missing output if its friendly name has not been saved yet.
+If Windows recreates a saved endpoint ID, only one active exact friendly-name
+match can recover it; ambiguous/missing devices require manual reselection.
+Relink through the three-dot menu after device-format changes. Windows captures
+the whole selected playback-endpoint mix; per-app exclusion is unsupported.
+Matching endpoint
 rates helped user testing (192000 Hz), not a universal fix. Preset loading,
 sustained DSP overload and independent device clocks can still cause glitches.
 
